@@ -6,7 +6,7 @@
   inputs = {
     haskell-nix.url = "github:input-output-hk/haskell.nix";
     nixpkgs.follows = "haskell-nix/nixpkgs-unstable";
-    haskell-nix.inputs.nixpkgs.follows = "haskell-nix/nixpkgs-unstable";
+    haskell-nix.inputs.nixpkgs.follows = "haskell-nix/nixpkgs-2105";
     plutus.url = "github:input-output-hk/plutus"; # used for libsodium-vrf (TODO: Is this really needed?)
     flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
   };
@@ -50,10 +50,8 @@
             ];
 
             tools = {
+              haskell-language-server = { }; # Must use haskell.nix, because the compiler version should match
               cabal-fmt = { };
-              # Must use haskell.nix, because the compiler version should match 
-              # Also uses a version that fixes https://github.com/haskell/haskell-language-server/issues/2396
-              haskell-language-server = "1.5.1.0";
             };
 
             additional = ps: [
