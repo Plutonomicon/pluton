@@ -51,15 +51,23 @@ common common
     -Wmissing-export-lists -Werror -Wincomplete-record-updates
     -Wmissing-deriving-strategies -Wno-name-shadowing
 
-library
+executable plut
   import: common
   hs-source-dirs: src
-  exposed-modules:
-    Plut
+  main-is: Main.hs
+  other-modules:
+    Plut.Sample.Offchain
+    Plut.Sample.Validator.Haskell
+    Plut.Sample.Validator.Pluto
   build-depends:
     , base
+    -- , pluto
     , plutus-core
-    , plutus-ledger-api
+    ,plutus-contract,
+      plutus-ledger,
+      plutus-ledger-api,
+      plutus-tx,
+      plutus-tx-plugin
     , text
     , hashable
     , bytestring
