@@ -1,5 +1,4 @@
 {
-    "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
     "editor.defaultFormatter": "haskell.haskell",
     "editor.formatOnSave": true
 }
