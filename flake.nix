@@ -3,11 +3,13 @@
 
   description = "plut";
 
-  inputs.haskell-nix.url = "github:input-output-hk/haskell.nix";
-  inputs.nixpkgs.follows = "haskell-nix/nixpkgs-unstable";
-  inputs.haskell-nix.inputs.nixpkgs.follows = "haskell-nix/nixpkgs-2105";
-  inputs.plutus.url = "github:input-output-hk/plutus"; # used for libsodium-vrf
-  inputs.flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
+  inputs = {
+    haskell-nix.url = "github:input-output-hk/haskell.nix";
+    nixpkgs.follows = "haskell-nix/nixpkgs-unstable";
+    haskell-nix.inputs.nixpkgs.follows = "haskell-nix/nixpkgs-2105";
+    plutus.url = "github:input-output-hk/plutus"; # used for libsodium-vrf (TODO: Is this really needed?)
+    flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
+  };
 
   outputs = inputs@{ self, nixpkgs, haskell-nix, plutus, ... }:
     let
@@ -55,6 +57,8 @@
               ps.plutus-ledger-api
             ];
           };
+
+          # sha256 hashes for repos pinned in cabal-haskell.nix.project
           sha256map = {
             "https://github.com/input-output-hk/plutus.git"."8cf171e0334dd14e5654da8230fa5ba3be660b32" = "OqnUr98x+n7wYSPWCUQmuaCC2LgthPVOmJ8LASRPN+U=";
             "https://github.com/Quid2/flat.git"."ee59880f47ab835dbd73bea0847dab7869fc20d8" = "lRFND+ZnZvAph6ZYkr9wl9VAx41pb3uSFP8Wc7idP9M=";
