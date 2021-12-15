@@ -39,10 +39,16 @@
 
             # We use the ones from Nixpkgs, since they are cached reliably.
             # Eventually we will probably want to build these with haskell.nix.
-            nativeBuildInputs = [ pkgs.cabal-install pkgs.hlint pkgs.haskellPackages.ormolu pkgs.haskellPackages.ghcid ];
+            nativeBuildInputs = [
+              pkgs.cabal-install
+              pkgs.hlint
+              pkgs.haskellPackages.ormolu
+              pkgs.haskellPackages.ghcid
+              pkgs.nixpkgs-fmt
+            ];
 
             tools = {
-              haskell-language-server = {};  # Must use haskell.nix, because the compiler version should match
+              haskell-language-server = { }; # Must use haskell.nix, because the compiler version should match
             };
 
             additional = ps: [
@@ -50,34 +56,28 @@
             ];
           };
           sha256map = {
-            "https://github.com/input-output-hk/plutus.git"."8cf171e0334dd14e5654da8230fa5ba3be660b32"
-              = "OqnUr98x+n7wYSPWCUQmuaCC2LgthPVOmJ8LASRPN+U=";
-            "https://github.com/Quid2/flat.git"."ee59880f47ab835dbd73bea0847dab7869fc20d8"
-              = "lRFND+ZnZvAph6ZYkr9wl9VAx41pb3uSFP8Wc7idP9M=";
-            "https://github.com/input-output-hk/cardano-crypto.git"."07397f0e50da97eaa0575d93bee7ac4b2b2576ec"
-              = "oxIOVlgm07FAEmgGRF1C2me9TXqVxQulEOcJ22zpTRs=";
-            "https://github.com/input-output-hk/cardano-base"."78b3928391b558fb1750228f63301ec371f13528"
-              = "pBUTTcenaSLMovHKGsaddJ7Jh3okRTrtu5W7Rdu6RM4=";
-            "https://github.com/input-output-hk/cardano-prelude"."fd773f7a58412131512b9f694ab95653ac430852"
-              = "BtbT5UxOAADvQD4qTPNrGfnjQNgbYNO4EAJwH2ZsTQo=";
-            "https://github.com/input-output-hk/Win32-network"."3825d3abf75f83f406c1f7161883c438dac7277d"
-              = "Hesb5GXSx0IwKSIi42ofisVELcQNX6lwHcoZcbaDiqc=";
-            "https://github.com/monadfix/shower.git"."3e02d92e0500e41b4e9932294f4960463a7222d4"
-              = "sha256-JGOO02bWpr2cUQdJItu56AeGKfQI4TmrmIkXDqkxe6Q=";
+            "https://github.com/input-output-hk/plutus.git"."8cf171e0334dd14e5654da8230fa5ba3be660b32" = "OqnUr98x+n7wYSPWCUQmuaCC2LgthPVOmJ8LASRPN+U=";
+            "https://github.com/Quid2/flat.git"."ee59880f47ab835dbd73bea0847dab7869fc20d8" = "lRFND+ZnZvAph6ZYkr9wl9VAx41pb3uSFP8Wc7idP9M=";
+            "https://github.com/input-output-hk/cardano-crypto.git"."07397f0e50da97eaa0575d93bee7ac4b2b2576ec" = "oxIOVlgm07FAEmgGRF1C2me9TXqVxQulEOcJ22zpTRs=";
+            "https://github.com/input-output-hk/cardano-base"."78b3928391b558fb1750228f63301ec371f13528" = "pBUTTcenaSLMovHKGsaddJ7Jh3okRTrtu5W7Rdu6RM4=";
+            "https://github.com/input-output-hk/cardano-prelude"."fd773f7a58412131512b9f694ab95653ac430852" = "BtbT5UxOAADvQD4qTPNrGfnjQNgbYNO4EAJwH2ZsTQo=";
+            "https://github.com/input-output-hk/Win32-network"."3825d3abf75f83f406c1f7161883c438dac7277d" = "Hesb5GXSx0IwKSIi42ofisVELcQNX6lwHcoZcbaDiqc=";
+            "https://github.com/monadfix/shower.git"."3e02d92e0500e41b4e9932294f4960463a7222d4" = "sha256-JGOO02bWpr2cUQdJItu56AeGKfQI4TmrmIkXDqkxe6Q=";
           };
         };
     in
     {
       project = perSystem projectFor;
-      flake = perSystem (system: (projectFor system).flake {});
+      flake = perSystem (system: (projectFor system).flake { });
 
       # this could be done automatically, but would reduce readability
       packages = perSystem (system: self.flake.${system}.packages);
       checks = perSystem (system: self.flake.${system}.checks);
       check = perSystem (system:
-        (nixpkgsFor system).runCommand "combined-test" {
-          nativeBuildInputs = builtins.attrValues self.checks.${system};
-        } "touch $out"
+        (nixpkgsFor system).runCommand "combined-test"
+          {
+            nativeBuildInputs = builtins.attrValues self.checks.${system};
+          } "touch $out"
       );
       apps = perSystem (system: self.flake.${system}.apps);
       devShell = perSystem (system: self.flake.${system}.devShell);
