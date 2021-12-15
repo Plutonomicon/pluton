@@ -1,0 +1,4 @@
+{
+    "editor.defaultFormatter": "haskell.haskell",
+    "editor.formatOnSave": true
+}
