@@ -95,8 +95,8 @@
 
           # sha256 hashes for repos pinned in cabal-haskell.nix.project
           sha256map = {
-            "https://github.com/input-output-hk/plutus.git"."3f089ccf0ca746b399c99afe51e063b0640af547" = "BhGQPiCv4UxVs0XEdMMddaNWiztmkoeJotpW/lrtqNs=";
-            "https://github.com/input-output-hk/plutus-apps.git"."404af7ac3e27ebcb218c05f79d9a70ca966407c9" = "+T9TGzHEzyfixBysxLwy5VWVrL5xqKF5pcbRlHQr+wI=";
+            "https://github.com/input-output-hk/plutus.git"."ae5f8b3ff64766717694bdca3d0385e717a963b8" = "cUStRRQRMa55/auopJHsphAcNNO5GgLHjyAI8HitE/I=";
+            "https://github.com/input-output-hk/plutus-apps.git"."ff17e42be4ede4ff9711634f1b924ca1de90851a" = "u8gU/uQYNDA0KM6+hNI3Oo0qOfjBx04b30I/Zsbv2Pc=";
             "https://github.com/Quid2/flat.git"."ee59880f47ab835dbd73bea0847dab7869fc20d8" = "lRFND+ZnZvAph6ZYkr9wl9VAx41pb3uSFP8Wc7idP9M=";
             "https://github.com/input-output-hk/purescript-bridge.git"."366fc70b341e2633f3ad0158a577d52e1cd2b138" = "paaId4GJ9/Z5LstYfakiCJZ2p9Q5NMHXdXUx5rTPQKI=";
             "https://github.com/input-output-hk/servant-purescript.git"."ebea59c7bdfc0338d83fca772b9a57e28560bcde" = "VkM9Q2XkDEnQh6khptoIjQ9xW7Fc2wsOJ4vPYDzBTD4=";
