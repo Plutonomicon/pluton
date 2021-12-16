@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -xe
+find -type f -name '*.hs' ! -path '*/dist-newstyle/*' | xargs fourmolu -o-XTypeApplications -o-XImportQualifiedPost -m inplace
+
+# If we so desire, uncomment these:
+#nixpkgs-fmt *.nix
+#cabal-fmt -i *.cabal

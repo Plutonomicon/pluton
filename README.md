@@ -1,6 +1,8 @@
 # plut
 
-Compare Pluto and Plutarch, via small examples and a sample contract
+**Work in Progress**
+
+Compare [Pluto](https://github.com/Plutonomicon/pluto) and [Plutarch](https://github.com/Plutonomicon/plutarch), via small examples and sample contracts, along the axis of developer ergonomics as well as generated script size.
 
 ## Developing
 
@@ -12,4 +14,12 @@ programs.direnv = {
   enableBashIntegration = true;
   nix-direnv.enable = true;
 };
+```
+
+## Running the tests
+
+In a nix-shell, run:
+
+```
+cabal run
 ```

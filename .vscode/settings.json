@@ -1,4 +1,4 @@
 {
-    "editor.defaultFormatter": "haskell.haskell",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "haskell.formattingProvider": "fourmolu"
 }
