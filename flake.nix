@@ -110,7 +110,7 @@
             "https://github.com/input-output-hk/cardano-ledger-specs"."bf008ce028751cae9fb0b53c3bef20f07c06e333" = "HTPOmVOXgBD/3uAxZip/HSttaKcJ+uImYDbuwANAw1c=";
             "https://github.com/input-output-hk/cardano-node.git"."b6ca519f97a0e795611a63174687e6bb70c9f752" = "tuEtSCJOk1MA9sguxL13XLa+qHaz//v7eNyhxHC9tHw=";
             "https://github.com/input-output-hk/optparse-applicative"."7497a29cb998721a9068d5725d49461f2bba0e7a" = "uQx+SEYsCH7JcG3xAT0eJck9yq3y0cvx49bvItLLer8=";
-            "https://github.com/input-output-hk/Win32-network"."3825d3abf75f83f406c1f7161883c438dac7277d" = "Hesb5GXSx0IwKSIi42ofisVELcQNX6lwHcoZcbaDiqc=";
+            "https://github.com/input-output-hk/Win32-network"."2d1a01c7cbb9f68a1aefe2934aad6c70644ebfea" = "sha256-uvYEWalN62ETpH45/O7lNHo4rAIaJtYpLWdIcAkq3dA=";
             "https://github.com/input-output-hk/goblins"."cde90a2b27f79187ca8310b6549331e59595e7ba" = "z9ut0y6umDIjJIRjz9KSvKgotuw06/S8QDwOtVdGiJ0=";
 
             # "https://github.com/Plutonomicon/pluto"."710155ae2df1570722f0df0baa4c0940b806a011" = "sha256-1211/uQYNDA0KM6+hNI3Oo1qOfjBx04b30I/Zsbv2Pc";
