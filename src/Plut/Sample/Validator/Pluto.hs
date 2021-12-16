@@ -8,7 +8,7 @@ import PlutusCore.Assembler.FFI qualified as PlutoFFI
 import PlutusCore.Assembler.Types.AST qualified as Pluto
 
 plutoValidatorProg :: Pluto.Program ()
-plutoValidatorProg = $(PlutoFFI.load "examples/contracts/sample/validator.pluto")
+plutoValidatorProg = $(PlutoFFI.load "src/Plut/Sample/Validator/validator.pluto")
 
 plutoValidator :: Validator
 plutoValidator =

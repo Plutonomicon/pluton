@@ -5,6 +5,7 @@ author:             Ardana Labs
 maintainer:         Sridhar Ratnakumar <srid@srid.ca>
 license:            MIT
 extra-source-files: README.md
+extra-source-files: src/**/*.pluto
 
 common common
   default-language:   Haskell2010
@@ -68,6 +69,7 @@ executable plut
     , hedgehog
     , lens
     , mtl
+    , pluto
     , plutus-contract
     , plutus-core
     , plutus-ledger
@@ -80,5 +82,3 @@ executable plut
     , tasty-hedgehog
     , tasty-quickcheck
     , text
-
--- , pluto

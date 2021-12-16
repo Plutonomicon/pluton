@@ -92,6 +92,7 @@
               ps.quickcheck-dynamic
               ps.Win32-network
               ps.word-array
+              ps.pluto
             ];
           };
 
@@ -114,8 +115,7 @@
             "https://github.com/input-output-hk/optparse-applicative"."7497a29cb998721a9068d5725d49461f2bba0e7a" = "uQx+SEYsCH7JcG3xAT0eJck9yq3y0cvx49bvItLLer8=";
             "https://github.com/input-output-hk/Win32-network"."2d1a01c7cbb9f68a1aefe2934aad6c70644ebfea" = "sha256-uvYEWalN62ETpH45/O7lNHo4rAIaJtYpLWdIcAkq3dA=";
             "https://github.com/input-output-hk/goblins"."cde90a2b27f79187ca8310b6549331e59595e7ba" = "z9ut0y6umDIjJIRjz9KSvKgotuw06/S8QDwOtVdGiJ0=";
-
-            # "https://github.com/Plutonomicon/pluto"."710155ae2df1570722f0df0baa4c0940b806a011" = "sha256-1211/uQYNDA0KM6+hNI3Oo1qOfjBx04b30I/Zsbv2Pc";
+            "https://github.com/Plutonomicon/pluto"."6546ff776ba811966af3a975938ada69c61f01ec" = "sha256-J1AHljKWjlmNMz/VfPxZ13e/f5S5fmlUW0b9jTTugAY";
           };
         };
     in
