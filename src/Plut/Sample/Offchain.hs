@@ -2,17 +2,17 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -fplugin-opt PlutusTx.Plugin:defer-errors #-}
 
-module Plut.Sample.Offchain
-  ( endpoints,
-    GiftSchema,
-  )
-where
+module Plut.Sample.Offchain (
+  endpoints,
+  GiftSchema,
+) where
 
 import Control.Monad (forever, void)
 import Data.Map as Map
@@ -66,6 +66,6 @@ endpoints :: Validator -> Contract () GiftSchema Text ()
 endpoints v =
   forever $
     selectList
-      [ endpoint @"give" (give v),
-        endpoint @"grab" (const $ grab v)
+      [ endpoint @"give" (give v)
+      , endpoint @"grab" (const $ grab v)
       ]

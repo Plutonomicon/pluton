@@ -2,6 +2,7 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
@@ -39,8 +40,8 @@ import Wallet.Emulator.Wallet (Wallet, knownWallets)
 -- -------------------------------------------------------------------------- --
 
 data SampleModel = SampleModel
-  { _giftAmount :: Integer,
-    _giftBeneficiary :: Maybe Wallet
+  { _giftAmount :: Integer
+  , _giftBeneficiary :: Maybe Wallet
   }
   deriving stock (Prelude.Eq, Prelude.Show)
 
@@ -63,8 +64,8 @@ instance PCT.ContractModel SampleModel where
     let minAda = 2
         val = (1000000 *) Prelude.<$> QC.choose @Integer (minAda, 5)
     QC.oneof
-      [ Prelude.fmap (Give wallet beneficiary) val,
-        Prelude.pure $ Grab wallet
+      [ Prelude.fmap (Give wallet beneficiary) val
+      , Prelude.pure $ Grab wallet
       ]
 
   initialState :: SampleModel
@@ -145,8 +146,8 @@ tests = do
         flip fmap [("Haskell", haskellValidator), ("Pluto", plutoValidator)] $ \(k, validator) ->
           T.testGroup
             ("Validator:" <> k)
-            [ QC.testProperty "contract" (modelCheck validator),
-              QC.testProperty "nofundslocked" (noFundsLocked validator)
+            [ QC.testProperty "contract" (modelCheck validator)
+            , QC.testProperty "nofundslocked" (noFundsLocked validator)
             ]
 
 main :: IO ()

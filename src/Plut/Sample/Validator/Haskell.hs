@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ViewPatterns #-}
@@ -8,10 +9,10 @@
 module Plut.Sample.Validator.Haskell (haskellValidator) where
 
 import Ledger (Validator, mkValidatorScript)
-import Ledger.Contexts
-  ( ScriptContext (scriptContextTxInfo),
-    txSignedBy,
-  )
+import Ledger.Contexts (
+  ScriptContext (scriptContextTxInfo),
+  txSignedBy,
+ )
 import PlutusTx qualified
 import PlutusTx.Prelude
 
