@@ -1,47 +1,46 @@
-{-# LANGUAGE DataKinds          #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE FlexibleInstances  #-}
-{-# LANGUAGE GADTs              #-}
-{-# LANGUAGE InstanceSigs       #-}
-{-# LANGUAGE LambdaCase         #-}
-{-# LANGUAGE RankNTypes         #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TemplateHaskell    #-}
-{-# LANGUAGE TypeApplications   #-}
-{-# LANGUAGE TypeFamilies       #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Main (main, tests) where
 
-import           Control.Lens.Combinators           (makeLenses, view)
-import           Control.Lens.Operators             ((^.))
-import           Control.Monad                      (void)
-import qualified Control.Monad.Freer.Extras         as Extras
-import           Data.Text                          (Text)
-import           Ledger                             hiding (singleton)
-import           Ledger.Ada                         as Ada (lovelaceValueOf)
-import           Plutus.Contract.Test               (w1, w2, w3)
-import qualified Plutus.Contract.Test               as PCT
-import qualified Plutus.Contract.Test.ContractModel as PCT
-import           Plutus.Trace.Emulator              (EmulatorTrace)
-import qualified Plutus.Trace.Emulator              as Em
-import           Sample.Offchain
-import           Sample.Validator.Haskell           (haskellValidator)
-import           Sample.Validator.Pluto             (plutoValidator)
-import qualified Test.QuickCheck.Gen                as QC
-import qualified Test.QuickCheck.Property           as QC
-import qualified Test.Tasty                         as T
-import qualified Test.Tasty.Hedgehog                as H
-import qualified Test.Tasty.QuickCheck              as QC
-import           Wallet.Emulator.Wallet             (Wallet, knownWallets)
-
+import Control.Lens.Combinators (makeLenses, view)
+import Control.Lens.Operators ((^.))
+import Control.Monad (void)
+import Control.Monad.Freer.Extras qualified as Extras
+import Data.Text (Text)
+import Ledger hiding (singleton)
+import Ledger.Ada as Ada (lovelaceValueOf)
+import Plut.Sample.Offchain
+import Plut.Sample.Validator.Haskell (haskellValidator)
+import Plut.Sample.Validator.Pluto (plutoValidator)
+import Plutus.Contract.Test (w1, w2, w3)
+import Plutus.Contract.Test qualified as PCT
+import Plutus.Contract.Test.ContractModel qualified as PCT
+import Plutus.Trace.Emulator (EmulatorTrace)
+import Plutus.Trace.Emulator qualified as Em
+import Test.QuickCheck.Gen qualified as QC
+import Test.QuickCheck.Property qualified as QC
+import Test.Tasty qualified as T
+import Test.Tasty.Hedgehog qualified as H
+import Test.Tasty.QuickCheck qualified as QC
+import Wallet.Emulator.Wallet (Wallet, knownWallets)
 
 -- -------------------------------------------------------------------------- --
 -- Tests                                                                      --
 -- -------------------------------------------------------------------------- --
 
 data SampleModel = SampleModel
-  { _giftAmount      :: Integer
-  , _giftBeneficiary :: Maybe Wallet
+  { _giftAmount :: Integer,
+    _giftBeneficiary :: Maybe Wallet
   }
   deriving stock (Prelude.Eq, Prelude.Show)
 
@@ -61,12 +60,11 @@ instance PCT.ContractModel SampleModel where
   arbitraryAction _ = do
     wallet <- genWallet
     beneficiary <- genWallet
-    let
-      minAda = 2
-      val = (1000000 *) Prelude.<$> QC.choose @Integer (minAda, 5)
-    QC.oneof [
-      Prelude.fmap (Give wallet beneficiary) val,
-      Prelude.pure $ Grab wallet
+    let minAda = 2
+        val = (1000000 *) Prelude.<$> QC.choose @Integer (minAda, 5)
+    QC.oneof
+      [ Prelude.fmap (Give wallet beneficiary) val,
+        Prelude.pure $ Grab wallet
       ]
 
   initialState :: SampleModel
@@ -75,7 +73,7 @@ instance PCT.ContractModel SampleModel where
   precondition :: PCT.ModelState SampleModel -> PCT.Action SampleModel -> Bool
   precondition s (Give _w giftee _) =
     s ^. PCT.contractState . giftBeneficiary Prelude.== Just giftee
-  precondition s (Grab _w)   =
+  precondition s (Grab _w) =
     s ^. PCT.contractState . giftAmount Prelude.>= 0
 
   nextState :: PCT.Action SampleModel -> PCT.Spec SampleModel ()
@@ -102,26 +100,27 @@ instance PCT.ContractModel SampleModel where
       void $ Em.waitNSlots 1
 
 deriving stock instance Prelude.Show (PCT.ContractInstanceKey SampleModel w s e)
-deriving stock instance Prelude.Eq (PCT.ContractInstanceKey SampleModel w s e)
 
+deriving stock instance Prelude.Eq (PCT.ContractInstanceKey SampleModel w s e)
 
 instanceSpec :: Validator -> [PCT.ContractInstanceSpec SampleModel]
 instanceSpec vl = [PCT.ContractInstanceSpec (UseContract w) w (endpoints vl) | w <- knownWallets]
 
 modelCheck :: Validator -> PCT.Actions SampleModel -> QC.Property
-modelCheck vl = QC.withMaxSuccess 10 . PCT.propRunActionsWithOptions
-    PCT.defaultCheckOptions
-    (instanceSpec vl)
-    (Prelude.const $ Prelude.pure True)
+modelCheck vl =
+  QC.withMaxSuccess 10
+    . PCT.propRunActionsWithOptions
+      PCT.defaultCheckOptions
+      (instanceSpec vl)
+      (Prelude.const $ Prelude.pure True)
 
 noFundsLocked :: Validator -> QC.Property
 noFundsLocked vl =
-    QC.withMaxSuccess 10
-      $ PCT.checkNoLockedFundsProof
-        PCT.defaultCheckOptions
-        (instanceSpec vl)
-        (PCT.NoLockedFundsProof (PCT.action $ Grab w1) (PCT.action . Grab))
-
+  QC.withMaxSuccess 10 $
+    PCT.checkNoLockedFundsProof
+      PCT.defaultCheckOptions
+      (instanceSpec vl)
+      (PCT.NoLockedFundsProof (PCT.action $ Grab w1) (PCT.action . Grab))
 
 smokeTrace :: Validator -> EmulatorTrace ()
 smokeTrace validator = do
@@ -130,7 +129,7 @@ smokeTrace validator = do
   h2 <- Em.activateContractWallet w2 ep
   h3 <- Em.activateContractWallet w3 ep
   Extras.logInfo $ "Beneficiary: " <> show w3
-  Em.callEndpoint @"give" h1 (PCT.walletPubKeyHash w3, 10*1000000)
+  Em.callEndpoint @"give" h1 (PCT.walletPubKeyHash w3, 10 * 1000000)
   void $ Em.waitUntilSlot 1
   Em.callEndpoint @"grab" h2 () -- Not a benefiary
   _s <- Em.waitNSlots 1
@@ -142,12 +141,13 @@ tests :: IO ()
 tests = do
   T.defaultMain $
     T.localOption (H.HedgehogTestLimit (Just 10)) . T.localOption (H.HedgehogShrinkLimit (Just 2)) $
-      T.testGroup "Sample Contract"
-         $ flip fmap [("Haskell", haskellValidator), ("Pluto", plutoValidator)] $ \(k, validator) ->
-          T.testGroup ("Validator:" <> k) [
-            QC.testProperty "contract" (modelCheck validator)
-            , QC.testProperty "nofundslocked" (noFundsLocked validator)
-          ]
+      T.testGroup "Sample Contract" $
+        flip fmap [("Haskell", haskellValidator), ("Pluto", plutoValidator)] $ \(k, validator) ->
+          T.testGroup
+            ("Validator:" <> k)
+            [ QC.testProperty "contract" (modelCheck validator),
+              QC.testProperty "nofundslocked" (noFundsLocked validator)
+            ]
 
 main :: IO ()
 main = do

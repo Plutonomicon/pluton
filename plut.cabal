@@ -1,28 +1,23 @@
 cabal-version:      2.4
 name:               plut
 version:            0.1.0
-
-author: Ardana Labs
-maintainer: Sridhar Ratnakumar <srid@srid.ca>
-license: MIT
-
+author:             Ardana Labs
+maintainer:         Sridhar Ratnakumar <srid@srid.ca>
+license:            MIT
 extra-source-files: README.md
 
 common common
-  default-language: Haskell2010
+  default-language:   Haskell2010
   default-extensions:
-    DeriveAnyClass
-    DerivingStrategies
-    LambdaCase
-    TypeFamilies
-    OverloadedStrings
     BangPatterns
+    DeriveAnyClass
     DeriveDataTypeable
     DeriveFoldable
     DeriveFunctor
     DeriveGeneric
     DeriveLift
     DeriveTraversable
+    DerivingStrategies
     ExistentialQuantification
     ExplicitForAll
     FlexibleContexts
@@ -32,8 +27,10 @@ common common
     ImportQualifiedPost
     InstanceSigs
     KindSignatures
+    LambdaCase
     MultiParamTypeClasses
     NamedWildCards
+    OverloadedStrings
     PatternGuards
     PolyKinds
     PostfixOperators
@@ -44,40 +41,44 @@ common common
     StarIsType
     TupleSections
     TypeApplications
+    TypeFamilies
     TypeOperators
     TypeSynonymInstances
+
   ghc-options:
     -Wall -Wcompat -Wincomplete-uni-patterns -Wredundant-constraints
     -Wmissing-export-lists -Werror -Wincomplete-record-updates
     -Wmissing-deriving-strategies -Wno-name-shadowing
 
 executable plut
-  import: common
+  import:         common
   hs-source-dirs: src
-  main-is: Main.hs
+  main-is:        Main.hs
   other-modules:
     Plut.Sample.Offchain
     Plut.Sample.Validator.Haskell
     Plut.Sample.Validator.Pluto
+
   build-depends:
     , base
-    -- , pluto
-    , plutus-core
-    ,plutus-contract,
-      plutus-ledger,
-      plutus-ledger-api,
-      plutus-tx,
-      plutus-tx-plugin
-    , text
-    , hashable
     , bytestring
     , containers
-    , plutus-tx
+    , freer-extras
+    , hashable
+    , hedgehog
+    , lens
     , mtl
+    , plutus-contract
+    , plutus-core
+    , plutus-ledger
+    , plutus-ledger-api
+    , plutus-tx
+    , plutus-tx-plugin
+    , QuickCheck
     , shower
     , tasty
-    , tasty-quickcheck
     , tasty-hedgehog
-    , hedgehog 
-    , QuickCheck
+    , tasty-quickcheck
+    , text
 
+-- , pluto
