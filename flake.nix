@@ -28,6 +28,10 @@
           cabalProjectLocal = builtins.readFile ./cabal-haskell.nix.project;
           modules = [{
             packages = {
+                                  marlowe.flags.defer-plugin-errors = true;
+                    plutus-use-cases.flags.defer-plugin-errors = true;
+                    plutus-ledger.flags.defer-plugin-errors = true;
+                    plutus-contract.flags.defer-plugin-errors = true;
               cardano-crypto-praos.components.library.pkgconfig =
                 nixpkgs.lib.mkForce [ [ (import plutus { inherit system; }).pkgs.libsodium-vrf ] ];
               cardano-crypto-class.components.library.pkgconfig =
@@ -39,19 +43,18 @@
 
             exactDeps = true;
 
-            # We use the ones from Nixpkgs, since they are cached reliably.
-            # Eventually we will probably want to build these with haskell.nix.
             nativeBuildInputs = [
-              pkgs.cabal-install
-              pkgs.hlint
-              pkgs.haskellPackages.ormolu
-              pkgs.haskellPackages.ghcid
               pkgs.nixpkgs-fmt
             ];
 
             tools = {
-              haskell-language-server = { }; # Must use haskell.nix, because the compiler version should match
+              cabal = {};
+              ghcid = {};
+              hlint = {};
+              ormolu = {};
               cabal-fmt = { };
+              # nixpkgs-fmt = {};
+              # haskell-language-server = { }; # Must use haskell.nix, because the compiler version should match
             };
 
             additional = ps: [
