@@ -1,3 +1,7 @@
 index-state: 2021-11-18T00:00:00Z
 
 packages: ./.
+
+-- Possibly helps with: https://github.com/haskell/haskell-language-server/issues/1737#issuecomment-825516365
+package haskell-language-server
+  ghc-options: -dynamic

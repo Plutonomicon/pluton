@@ -1,12 +1,9 @@
 {
-  # From https://github.com/Liqwid-Labs/plutus-extra/blob/cc303f95762c7f23f27abf54c527ac510dbabba6/flake.nix
-
   description = "plut";
 
   inputs = {
     haskell-nix.url = "github:input-output-hk/haskell.nix";
     nixpkgs.follows = "haskell-nix/nixpkgs-unstable";
-    # haskell-nix.inputs.nixpkgs.follows = "haskell-nix/nixpkgs-2105";
     plutus.url = "github:input-output-hk/plutus"; # used for libsodium-vrf (TODO: Is this really needed?)
     flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
   };
@@ -14,9 +11,7 @@
   outputs = inputs@{ self, nixpkgs, haskell-nix, plutus, ... }:
     let
       supportedSystems = with nixpkgs.lib.systems.supported; tier1 ++ tier2 ++ tier3;
-
       perSystem = nixpkgs.lib.genAttrs supportedSystems;
-
       nixpkgsFor = system: import nixpkgs { inherit system; overlays = [ haskell-nix.overlay ]; inherit (haskell-nix) config; };
 
       projectFor = system:
@@ -40,7 +35,6 @@
           }];
           shell = {
             withHoogle = true;
-
             exactDeps = true;
 
             nativeBuildInputs = [
@@ -135,6 +129,7 @@
       apps = perSystem (system: self.flake.${system}.apps);
       devShell = perSystem (system: self.flake.${system}.devShell);
 
+      # For Hercules CI
       nixCi = inputs.flake-compat-ci.lib.recurseIntoFlakeWith {
         flake = self;
         # Add darwin here once Plutus supports it.
