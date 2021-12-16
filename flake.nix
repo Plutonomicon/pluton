@@ -28,10 +28,10 @@
           cabalProjectLocal = builtins.readFile ./cabal-haskell.nix.project;
           modules = [{
             packages = {
-                                  marlowe.flags.defer-plugin-errors = true;
-                    plutus-use-cases.flags.defer-plugin-errors = true;
-                    plutus-ledger.flags.defer-plugin-errors = true;
-                    plutus-contract.flags.defer-plugin-errors = true;
+              marlowe.flags.defer-plugin-errors = true;
+              plutus-use-cases.flags.defer-plugin-errors = true;
+              plutus-ledger.flags.defer-plugin-errors = true;
+              plutus-contract.flags.defer-plugin-errors = true;
               cardano-crypto-praos.components.library.pkgconfig =
                 nixpkgs.lib.mkForce [ [ (import plutus { inherit system; }).pkgs.libsodium-vrf ] ];
               cardano-crypto-class.components.library.pkgconfig =
@@ -48,12 +48,11 @@
             ];
 
             tools = {
-              cabal = {};
-              ghcid = {};
-              hlint = {};
-              ormolu = {};
+              cabal = { };
+              ghcid = { };
+              hlint = { };
+              ormolu = { };
               cabal-fmt = { };
-              # nixpkgs-fmt = {};
               # haskell-language-server = { }; # Must use haskell.nix, because the compiler version should match
             };
 
