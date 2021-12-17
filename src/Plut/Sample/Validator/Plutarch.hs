@@ -20,22 +20,21 @@ import Plutarch.String (pfromText)
 import Plutarch.Unit
 import PlutusCore qualified as PLC
 
--- TODO: implement this
 plutarchValidator :: Validator
 plutarchValidator =
   Validator $ compile validator
 
+-- | TODO: Rewrite raw 'Untyped Plutarch' to use the types from typed eDSL
 validator :: forall s. Term s (PByteString :--> PByteString :--> PByteString :--> PUnit)
 validator =
   plam $ \datum (_redeemer :: Term s PByteString) (ctx :: Term s PByteString) ->
-    pTrace "yoyo" $
-      plet
-        (atProduct 0 ctx)
-        $ \txInfo ->
-          plet (atProduct 7 txInfo) $ \signatories' ->
-            plet (pUnListData £ punsafeCoerce signatories') $ \signatories ->
-              plet (hasElem (punsafeCoerce datum) signatories) $ \(isBeneficiary :: Term s PBool) ->
-                pif isBeneficiary (pcon PUnit) perror
+    plet
+      (pTrace "yoyo:atProduct" $ atProduct 0 $ pTrace "yoyo:ctx" ctx)
+      $ \txInfo ->
+        plet (atProduct 7 $ pTrace "yoyo:txInfo" txInfo) $ \signatories' ->
+          plet (pUnListData £ punsafeCoerce (pTrace "yoyo:sig" signatories')) $ \signatories ->
+            plet (pTrace "yoyo:hasElem" $ hasElem (punsafeCoerce datum) signatories) $ \(isBeneficiary :: Term s PBool) ->
+              pif isBeneficiary (pcon PUnit) $ pTrace "yoyo:not-beneficiary" perror
 
 instance PEq POpaque where
   a £== b =
@@ -50,7 +49,7 @@ hasElem k list' =
     go =
       pfix £$ plam $ \self list ->
         pmatch' list $ \case
-          PNil -> pcon PFalse
+          PNil -> pTrace "yoyo:hasElem:error" $ pcon PFalse
           PCons x xs ->
             pif
               (k £== x)
@@ -59,29 +58,26 @@ hasElem k list' =
 
 atProduct :: Term s PInteger -> Term s a -> Term s POpaque
 atProduct n dat =
-  plet (pUnConstrData £ punsafeCoerce dat) $ \dat' ->
-    pmatch' dat' $ \(PPair _ products :: PPair s) ->
+  plet (pTrace "yoyo:pUnConstrData" $ pUnConstrData £ punsafeCoerce dat) $ \dat' ->
+    pmatch' (pTrace "yoyo:dat'" dat') $ \(PPair _ products :: PPair s) ->
       atIndex n products
 
 atIndex :: Term s PInteger -> Term s POpaque -> Term s POpaque
 atIndex n =
-  (go £ (n - 1) £)
+  (go £ n £)
   where
     go :: Term s (PInteger :--> POpaque :--> POpaque)
     go = phoistAcyclic $
       pfix
         £$ plam
         $ \self n' list ->
-          pmatch' list $ \case
-            PNil -> perror
+          pmatch' (pTrace "yoyo:n" list) $ \case
+            PNil -> pTrace "yoyo:atIndex:err" perror
             PCons x xs ->
-              pifB (n' £== 0)
-                £ x
-                £ (self £ (n' - 1) £ xs)
-
--- | Builtin IfThenElse (strict, not lazy like pmatch)
-pifB :: Term s PBool -> Term s (a :--> a :--> a)
-pifB = (pif' £)
+              pif
+                (n' £== 0)
+                x
+                (self £ (n' - 1) £ xs)
 
 -- Returns a pair of Integer and [Data]
 pUnConstrData :: Term s (POpaque :--> POpaque)
@@ -93,10 +89,10 @@ pUnListData = pBuiltin PLC.UnListData nat0
 pBuiltin :: PLC.DefaultFun -> Nat -> Term s a
 pBuiltin builtin forceLevel =
   phoistAcyclic $ forceN forceLevel $ punsafeBuiltin builtin
-
-forceN :: Nat -> Term s a -> Term s a
-forceN Z = id
-forceN (S n) = pforce . punsafeCoerce . forceN n
+  where
+    forceN :: Nat -> Term s a -> Term s a
+    forceN Z = id
+    forceN (S n) = pforce . punsafeCoerce . forceN n
 
 -- All of these are working with `Data`
 
@@ -107,6 +103,7 @@ instance PlutusType PPair where
   type PInner PPair _ = POpaque
   pcon' (PPair a b) = pMkPairData £ a £ b
   pmatch' pair f =
+    -- TODO: use delay/force to avoid evaluating `pair` twice?
     plet (pFstPair £ pair) $ \a ->
       plet (pSndPair £ pair) $ \b ->
         f $ PPair a b
@@ -130,10 +127,11 @@ instance PlutusType PList where
   pcon' PNil = undefined -- TODO??
   pcon' (PCons x xs) = pMkCons £ x £ xs
   pmatch' list f =
-    plet (pChooseList £ list £ punsafeCoerce (pcon' PTrue) £ punsafeCoerce (pcon' PTrue)) $ \isEmpty ->
-      pifB (punsafeCoerce isEmpty)
-        £ f PNil
-        £ plet
+    plet (pNullList £ list) $ \isEmpty ->
+      pif
+        (punsafeCoerce isEmpty)
+        (f PNil)
+        $ plet
           (pHeadList £ list)
           ( \head ->
               plet (pTailList £ list) $ \tail ->
@@ -143,14 +141,14 @@ instance PlutusType PList where
 pMkCons :: Term s (POpaque :--> POpaque :--> POpaque)
 pMkCons = pBuiltin PLC.MkCons nat1
 
+pNullList :: Term s (POpaque :--> PBool)
+pNullList = pBuiltin PLC.NullList nat1
+
 pHeadList :: Term s (POpaque :--> POpaque)
 pHeadList = pBuiltin PLC.HeadList nat1
 
 pTailList :: Term s (POpaque :--> POpaque)
 pTailList = pBuiltin PLC.TailList nat1
-
-pChooseList :: Term s (POpaque :--> POpaque :--> POpaque :--> POpaque)
-pChooseList = pBuiltin PLC.ChooseList nat1
 
 pTrace :: forall a s. Text -> Term s a -> Term s a
 pTrace s f = pBuiltin PLC.Trace nat1 £ pfromText s £ f
