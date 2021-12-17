@@ -39,6 +39,7 @@ executable plut
     , base
     , bytestring
     , containers
+    , fin
     , freer-extras
     , hashable
     , hedgehog

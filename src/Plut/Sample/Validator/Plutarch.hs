@@ -1,18 +1,22 @@
-{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module Plut.Sample.Validator.Plutarch (plutarchValidator) where
 
-import Data.ByteString (ByteString)
+import Data.Nat (Nat (S, Z), nat0, nat1, nat2)
 import Data.Text (Text)
-import Data.Text.Encoding (encodeUtf8)
 import Ledger.Scripts (Validator (..))
 import Plutarch
 import Plutarch.Bool
 import Plutarch.ByteString
 import Plutarch.Integer
+import Plutarch.String (pfromText)
 import Plutarch.Unit
 import PlutusCore qualified as PLC
 
@@ -35,7 +39,7 @@ validator =
 
 instance PEq POpaque where
   a £== b =
-    pBuiltin PLC.EqualsData £ a £ b
+    pBuiltin PLC.EqualsData nat0 £ a £ b
 
 hasElem :: forall s. Term s POpaque -> Term s POpaque -> Term s PBool
 hasElem k list' =
@@ -81,14 +85,18 @@ pifB = (pif' £)
 
 -- Returns a pair of Integer and [Data]
 pUnConstrData :: Term s (POpaque :--> POpaque)
-pUnConstrData = pBuiltin PLC.UnConstrData
+pUnConstrData = pBuiltin PLC.UnConstrData nat0
 
 pUnListData :: Term s (POpaque :--> POpaque)
-pUnListData = pBuiltin PLC.UnListData
+pUnListData = pBuiltin PLC.UnListData nat0
 
-pBuiltin :: PLC.DefaultFun -> Term s a
-pBuiltin builtin =
-  phoistAcyclic $ pforce $ punsafeBuiltin builtin
+pBuiltin :: PLC.DefaultFun -> Nat -> Term s a
+pBuiltin builtin forceLevel =
+  phoistAcyclic $ forceN forceLevel $ punsafeBuiltin builtin
+
+forceN :: Nat -> Term s a -> Term s a
+forceN Z = id
+forceN (S n) = pforce . punsafeCoerce . forceN n
 
 -- All of these are working with `Data`
 
@@ -105,13 +113,13 @@ instance PlutusType PPair where
 
 pMkPairData :: Term s (POpaque :--> POpaque :--> POpaque)
 pMkPairData =
-  pBuiltin PLC.MkPairData
+  pBuiltin PLC.MkPairData nat0
 
 pFstPair :: Term s (POpaque :--> POpaque)
-pFstPair = pBuiltin PLC.FstPair
+pFstPair = pBuiltin PLC.FstPair nat2
 
 pSndPair :: Term s (POpaque :--> POpaque)
-pSndPair = pBuiltin PLC.SndPair
+pSndPair = pBuiltin PLC.SndPair nat2
 
 data PList s
   = PNil
@@ -133,20 +141,16 @@ instance PlutusType PList where
           )
 
 pMkCons :: Term s (POpaque :--> POpaque :--> POpaque)
-pMkCons = pBuiltin PLC.MkCons
+pMkCons = pBuiltin PLC.MkCons nat1
 
 pHeadList :: Term s (POpaque :--> POpaque)
-pHeadList = pBuiltin PLC.HeadList
+pHeadList = pBuiltin PLC.HeadList nat1
 
 pTailList :: Term s (POpaque :--> POpaque)
-pTailList = pBuiltin PLC.TailList
+pTailList = pBuiltin PLC.TailList nat1
 
 pChooseList :: Term s (POpaque :--> POpaque :--> POpaque :--> POpaque)
-pChooseList = pBuiltin PLC.ChooseList
+pChooseList = pBuiltin PLC.ChooseList nat1
 
 pTrace :: forall a s. Text -> Term s a -> Term s a
-pTrace s f = pBuiltin PLC.Trace £ pByteString (encodeUtf8 s) £ f
-
-pByteString :: ByteString -> Term s PByteString
-pByteString =
-  punsafeConstant . PLC.Some . PLC.ValueOf PLC.DefaultUniByteString
+pTrace s f = pBuiltin PLC.Trace nat1 £ pfromText s £ f
