@@ -34,12 +34,12 @@ validator :: forall s. Term s (PByteString :--> PByteString :--> PByteString :--
 validator =
   plam $ \datum (_redeemer :: Term s PByteString) (ctx :: Term s PByteString) ->
     plet
-      (pTrace "yoyo:atProduct" $ atProduct 0 $ pTrace "yoyo:ctx" ctx)
+      (pTrace "plu:atProduct" $ atProduct 0 $ pTrace "plu:ctx" ctx)
       $ \txInfo ->
-        plet (atProduct 7 $ pTrace "yoyo:txInfo" txInfo) $ \signatories' ->
-          plet ((PLC.UnListData #) £ punsafeCoerce (pTrace "yoyo:sig" signatories')) $ \signatories ->
-            plet (pTrace "yoyo:hasElem" $ hasElem (punsafeCoerce datum) signatories) $ \(isBeneficiary :: Term s PBool) ->
-              pif isBeneficiary (pcon PUnit) $ pTrace "yoyo:not-beneficiary" perror
+        plet (atProduct 7 $ pTrace "plu:txInfo" txInfo) $ \signatories' ->
+          plet ((PLC.UnListData #) £ punsafeCoerce (pTrace "plu:sig" signatories')) $ \signatories ->
+            plet (pTrace "plu:hasElem" $ hasElem (punsafeCoerce datum) signatories) $ \(isBeneficiary :: Term s PBool) ->
+              pif isBeneficiary (pcon PUnit) $ pTrace "plu:not-beneficiary" perror
 
 instance PEq POpaque where
   a £== b =
@@ -56,7 +56,7 @@ hasElem k list' =
     go =
       pfix £$ plam $ \self list ->
         pmatch' list $ \case
-          PNil -> pTrace "yoyo:hasElem:error" $ pcon PFalse
+          PNil -> pTrace "plu:hasElem:error" $ pcon PFalse
           PCons x xs ->
             pif
               (k £== x)
@@ -65,8 +65,8 @@ hasElem k list' =
 
 atProduct :: Term s PInteger -> Term s a -> Term s POpaque
 atProduct n dat =
-  plet (pTrace "yoyo:pUnConstrData" $ (PLC.UnConstrData #) £ punsafeCoerce dat) $ \dat' ->
-    pmatch' (pTrace "yoyo:dat'" dat') $ \(PPair _ products :: PPair s) ->
+  plet (pTrace "plu:pUnConstrData" $ (PLC.UnConstrData #) £ punsafeCoerce dat) $ \dat' ->
+    pmatch' (pTrace "plu:dat'" dat') $ \(PPair _ products :: PPair s) ->
       atIndex n products
 
 atIndex :: Term s PInteger -> Term s POpaque -> Term s POpaque
@@ -78,8 +78,8 @@ atIndex n =
       pfix
         £$ plam
         $ \self n' list ->
-          pmatch' (pTrace "yoyo:n" list) $ \case
-            PNil -> pTrace "yoyo:atIndex:err" perror
+          pmatch' (pTrace "plu:n" list) $ \case
+            PNil -> pTrace "plu:atIndex:err" perror
             PCons x xs ->
               pif
                 (n' £== 0)
