@@ -259,3 +259,8 @@ source-repository-package
   type: git
   location: https://github.com/Plutonomicon/pluto
   tag: 6546ff776ba811966af3a975938ada69c61f01ec
+
+source-repository-package
+  type: git
+  location: https://github.com/Plutonomicon/plutarch
+  tag: 9d08fcfc4b9cf260fd197cb7688a0a29b43d71cc

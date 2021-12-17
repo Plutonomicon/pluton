@@ -32,6 +32,7 @@ executable plut
   other-modules:
     Plut.Sample.Offchain
     Plut.Sample.Validator.Haskell
+    Plut.Sample.Validator.Plutarch
     Plut.Sample.Validator.Pluto
 
   build-depends:
@@ -43,6 +44,7 @@ executable plut
     , hedgehog
     , lens
     , mtl
+    , plutarch
     , pluto
     , plutus-contract
     , plutus-core
