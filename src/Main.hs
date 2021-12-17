@@ -16,6 +16,7 @@ import Ledger hiding (singleton)
 import Ledger.Ada as Ada (lovelaceValueOf)
 import Plut.Sample.Offchain
 import Plut.Sample.Validator.Haskell (haskellValidator)
+import Plut.Sample.Validator.Plutarch (plutarchValidator)
 import Plut.Sample.Validator.Pluto (plutoValidator)
 import Plutus.Contract.Test (w1, w2, w3)
 import Plutus.Contract.Test qualified as PCT
@@ -134,10 +135,15 @@ smokeTrace validator = do
 
 tests :: IO ()
 tests = do
+  let validators =
+        [ ("Haskell", haskellValidator)
+        , ("Pluto", plutoValidator)
+        , ("Plutarch", plutarchValidator)
+        ]
   T.defaultMain $
     T.localOption (H.HedgehogTestLimit (Just 10)) . T.localOption (H.HedgehogShrinkLimit (Just 2)) $
       T.testGroup "Sample Contract" $
-        flip fmap [("Haskell", haskellValidator), ("Pluto", plutoValidator)] $ \(k, validator) ->
+        flip fmap validators $ \(k, validator) ->
           T.testGroup
             ("Validator:" <> k)
             [ QC.testProperty "contract" (modelCheck validator)
@@ -146,5 +152,5 @@ tests = do
 
 main :: IO ()
 main = do
-  Em.runEmulatorTraceIO $ smokeTrace plutoValidator
+  Em.runEmulatorTraceIO $ smokeTrace plutarchValidator
   tests
