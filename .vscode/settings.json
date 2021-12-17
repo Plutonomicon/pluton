@@ -1,4 +1,8 @@
 {
     "editor.formatOnSave": true,
-    "haskell.formattingProvider": "fourmolu"
+    "haskell.formattingProvider": "fourmolu",
+    "files.watcherExclude": {
+        "**/.direnv/**": true,
+        "**/dist-newstyle/**": true
+    }
 }
