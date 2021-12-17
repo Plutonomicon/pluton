@@ -32,17 +32,20 @@ executable plut
   other-modules:
     Plut.Sample.Offchain
     Plut.Sample.Validator.Haskell
+    Plut.Sample.Validator.Plutarch
     Plut.Sample.Validator.Pluto
 
   build-depends:
     , base
     , bytestring
     , containers
+    , fin
     , freer-extras
     , hashable
     , hedgehog
     , lens
     , mtl
+    , plutarch
     , pluto
     , plutus-contract
     , plutus-core
