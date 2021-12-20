@@ -32,19 +32,15 @@ plutarchValidator =
 {- | TODO: Rewrite raw 'Untyped Plutarch' to use the types from typed eDSL
  Upstream the types to Plutarch
 -}
-validator :: ClosedTerm (PByteString :--> PByteString :--> PByteString :--> PUnit)
+validator :: ClosedTerm (PByteString :--> PByteString :--> ScriptContext :--> PUnit)
 validator =
-  plam $ \datum (_redeemer :: Term s PByteString) (ctx :: Term s PByteString) ->
+  plam $ \datum (_redeemer :: Term s PByteString) ctxT ->
     -- TODO: Monadic DSL for threading through match/let/if?
-    pmatch' (punsafeCoerce ctx) $ \(ctx' :: ScriptContext s) ->
-      pmatch' (punsafeCoerce $ scriptContextTxInfo ctx') $ \(txInfo :: TxInfo s) ->
-        plet (pTrace "plu:sig" (txInfoSignatories txInfo)) $ \signatories ->
-          plet (pTrace "plu:hasElem" $ hasElem £ punsafeCoerce datum £ signatories) $ \(isBeneficiary :: Term s PBool) ->
+    pmatch' ctxT $ \(ctx :: ScriptContext s) ->
+      pmatch' (scriptContextTxInfo ctx) $ \(txInfo :: TxInfo s) ->
+        plet (txInfoSignatories txInfo) $ \signatories ->
+          plet (hasElem £ punsafeCoerce datum £ signatories) $ \(isBeneficiary :: Term s PBool) ->
             pif isBeneficiary (pcon PUnit) $ pTrace "plu:not-beneficiary" perror
-
-instance PEq POpaque where
-  a £== b =
-    pBuiltin PLC.EqualsData £ a £ b
 
 -- EXP
 
@@ -54,18 +50,18 @@ data ScriptContext s = ScriptContext
   }
 
 data TxInfo s = TxInfo
-  { txInfoSignatories :: Term s POpaque
+  { txInfoSignatories :: Term s (PList POpaque)
   }
 
 -- We first write instances by hand, then generalize.
 instance PlutusType ScriptContext where
-  type PInner ScriptContext b = POpaque
+  type PInner ScriptContext b = ScriptContext
 
   {-
   pcon' (ScriptContext a b) =
     (PLC.ConstrData #)
       -- Only sum type, indexed at 0
-      £ (pcon' $ PPair
+      £ (pcon' $ PPairData
             (punsafeCoerce $ (PLC.IData #) £ (0 :: Term s PInteger))
             (punsafeCoerce $ (PLC.MkNilData #) £ pcon PUnit))
       -- Fields of the first sum choice
@@ -77,35 +73,65 @@ instance PlutusType ScriptContext where
   -}
   pcon' = undefined
   pmatch' dat f =
-    plet (pTrace "plu:pUnConstrData" $ (PLC.UnConstrData #) £ dat) $ \dat' ->
-      pmatch' (pTrace "plu:dat'" dat') $ \(PPair _n0 products :: PPair s) ->
+    plet (pTrace "plu:pUnConstrData" $ PLC.UnConstrData #£ dat) $ \dat' ->
+      pmatch' (pTrace "plu:dat'" dat') $ \(PPairData _n0 products :: PPairData PInteger (PList POpaque) s) ->
         plet (atIndex £ (0 :: Term s PInteger) £ products) $ \a ->
+          -- TODO: Allow lazy retrieval of fields
           plet (atIndex £ (1 :: Term s PInteger) £ products) $ \b ->
             f (ScriptContext (punsafeCoerce a) b)
 
 instance PlutusType TxInfo where
-  type PInner TxInfo _ = POpaque
+  type PInner TxInfo _ = TxInfo
   pcon' = undefined
   pmatch' dat f =
-    plet (pTrace "plu:pUnConstrData" $ (PLC.UnConstrData #) £ dat) $ \dat' ->
-      pmatch' (pTrace "plu:dat'" dat') $ \(PPair _ products :: PPair s) ->
+    plet (pTrace "plu:pUnConstrData" $ PLC.UnConstrData #£ dat) $ \dat' ->
+      pmatch' (pTrace "plu:dat'" dat') $ \(PPairData _ products :: PPairData PInteger (PList POpaque) s) ->
         plet (atIndex £ (7 :: Term s PInteger) £ products) $ \x ->
-          f (TxInfo $ (PLC.UnListData #) £ punsafeCoerce x)
+          f (TxInfo $ PLC.UnListData #£ punsafeCoerce x)
 
-atIndex :: ClosedTerm (PInteger :--> POpaque :--> POpaque)
-atIndex =
-  pfix £$ plam $ \self n' list ->
-    pmatch' (pTrace "plu:n" list) $ \case
-      PNil -> pTrace "plu:atIndex:err" perror
-      PCons x xs ->
-        pif
-          (n' £== 0)
-          x
-          (self £ (n' - 1) £ xs)
+-------------------------------
+-- To upstream (after clean up)
+-------------------------------
+instance PEq POpaque where
+  a £== b =
+    pBuiltin PLC.EqualsData £ a £ b
 
--- List functions
+-- Pair of Data
 
-hasElem :: ClosedTerm (POpaque :--> POpaque :--> PBool)
+data PPairData a b s = PPairData (Term s a) (Term s b)
+
+instance PlutusType (PPairData a b) where
+  type PInner (PPairData a b) _ = PPairData a b
+  pcon' (PPairData a b) = PLC.MkPairData #£ a £ b -- There is no MkPair
+  pmatch' pair f =
+    -- TODO: use delay/force to avoid evaluating `pair` twice?
+    plet (PLC.FstPair #£ pair) $ \a ->
+      plet (PLC.SndPair #£ pair) $ \b ->
+        f $ PPairData a b
+
+-- List
+
+data PList a s
+  = PNil
+  | PCons (Term s a) (Term s (PList a))
+
+instance PlutusType (PList a) where
+  type PInner (PList a) _ = PList a
+  pcon' PNil = undefined -- TODO??
+  pcon' (PCons x xs) = PLC.MkCons #£ x £ xs
+  pmatch' list f =
+    plet (PLC.NullList #£ list) $ \isEmpty ->
+      pif
+        (punsafeCoerce isEmpty)
+        (f PNil)
+        $ plet
+          (PLC.HeadList #£ list)
+          ( \head ->
+              plet (PLC.TailList #£ list) $ \tail ->
+                f $ PCons head tail
+          )
+
+hasElem :: PEq a => ClosedTerm (a :--> PList a :--> PBool)
 hasElem =
   pfix £$ plam $ \self k list ->
     pmatch' list $ \case
@@ -116,49 +142,29 @@ hasElem =
           (pcon PTrue)
           (self £ k £ xs)
 
--- All of these are working with `Data`
-
-data PPair s = PPair (Term s POpaque) (Term s POpaque)
-
-instance PlutusType PPair where
-  type PInner PPair _ = POpaque
-  pcon' (PPair a b) = (PLC.MkPairData #) £ a £ b -- There is no MkPair, plutus build constructs pair of data
-  pmatch' pair f =
-    -- TODO: use delay/force to avoid evaluating `pair` twice?
-    plet ((PLC.FstPair #) £ pair) $ \a ->
-      plet ((PLC.SndPair #) £ pair) $ \b ->
-        f $ PPair a b
-
-data PList s
-  = PNil
-  | PCons (Term s POpaque) (Term s POpaque)
-
-instance PlutusType PList where
-  type PInner PList _ = POpaque
-  pcon' PNil = undefined -- TODO??
-  pcon' (PCons x xs) = (PLC.MkCons #) £ x £ xs
-  pmatch' list f =
-    plet ((PLC.NullList #) £ list) $ \isEmpty ->
-      pif
-        (punsafeCoerce isEmpty)
-        (f PNil)
-        $ plet
-          ((PLC.HeadList #) £ list)
-          ( \head ->
-              plet ((PLC.TailList #) £ list) $ \tail ->
-                f $ PCons head tail
-          )
+atIndex :: ClosedTerm (PInteger :--> PList a :--> a)
+atIndex =
+  pfix £$ plam $ \self n' list ->
+    pmatch' (pTrace "plu:n" list) $ \case
+      PNil -> pTrace "plu:atIndex:err" perror
+      PCons x xs ->
+        pif
+          (n' £== 0)
+          x
+          (self £ (n' - 1) £ xs)
 
 -- Trace
 
 pTrace :: Text -> Term s a -> Term s a
-pTrace s f = pBuiltin PLC.Trace £ pfromText s £ f
+pTrace s f = PLC.Trace #£ pfromText s £ f
 
 -- Builtins
 
-(#) :: forall k (s :: k) (a :: k -> Type). PLC.DefaultFun -> Term s a
-(#) = pBuiltin
-infixl 6 #
+-- | Builtin function application
+(#£) :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). PLC.DefaultFun -> Term s a -> Term s b
+(#£) f af = pBuiltin f £ af
+
+infixl 9 #£
 
 pBuiltin :: PLC.DefaultFun -> Term s a
 pBuiltin builtin =
