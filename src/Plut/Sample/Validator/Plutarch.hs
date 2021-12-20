@@ -1,5 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -14,6 +15,7 @@ module Plut.Sample.Validator.Plutarch (plutarchValidator) where
 import Data.Kind (Type)
 import Data.Nat (Nat (S, Z), nat0, nat1, nat2)
 import Data.Text (Text)
+import Debug.Trace
 import Ledger.Scripts (Validator (..))
 import Plutarch
 import Plutarch.Bool
@@ -30,61 +32,89 @@ plutarchValidator =
 {- | TODO: Rewrite raw 'Untyped Plutarch' to use the types from typed eDSL
  Upstream the types to Plutarch
 -}
-validator :: forall s. Term s (PByteString :--> PByteString :--> PByteString :--> PUnit)
+validator :: ClosedTerm (PByteString :--> PByteString :--> PByteString :--> PUnit)
 validator =
   plam $ \datum (_redeemer :: Term s PByteString) (ctx :: Term s PByteString) ->
-    plet
-      (pTrace "plu:atProduct" $ atProduct 0 $ pTrace "plu:ctx" ctx)
-      $ \txInfo ->
-        plet (atProduct 7 $ pTrace "plu:txInfo" txInfo) $ \signatories' ->
-          plet ((PLC.UnListData #) £ punsafeCoerce (pTrace "plu:sig" signatories')) $ \signatories ->
-            plet (pTrace "plu:hasElem" $ hasElem (punsafeCoerce datum) signatories) $ \(isBeneficiary :: Term s PBool) ->
-              pif isBeneficiary (pcon PUnit) $ pTrace "plu:not-beneficiary" perror
+    -- TODO: Monadic DSL for threading through match/let/if?
+    pmatch' (punsafeCoerce ctx) $ \(ctx' :: ScriptContext s) ->
+      pmatch' (punsafeCoerce $ scriptContextTxInfo ctx') $ \(txInfo :: TxInfo s) ->
+        plet (pTrace "plu:sig" (txInfoSignatories txInfo)) $ \signatories ->
+          plet (pTrace "plu:hasElem" $ hasElem £ punsafeCoerce datum £ signatories) $ \(isBeneficiary :: Term s PBool) ->
+            pif isBeneficiary (pcon PUnit) $ pTrace "plu:not-beneficiary" perror
 
 instance PEq POpaque where
   a £== b =
     pBuiltin PLC.EqualsData £ a £ b
 
+-- EXP
+
+data ScriptContext s = ScriptContext
+  { scriptContextTxInfo :: Term s TxInfo
+  , _scriptContextPurpose :: Term s POpaque
+  }
+
+data TxInfo s = TxInfo
+  { txInfoSignatories :: Term s POpaque
+  }
+
+-- We first write instances by hand, then generalize.
+instance PlutusType ScriptContext where
+  type PInner ScriptContext b = POpaque
+
+  {-
+  pcon' (ScriptContext a b) =
+    (PLC.ConstrData #)
+      -- Only sum type, indexed at 0
+      £ (pcon' $ PPair
+            (punsafeCoerce $ (PLC.IData #) £ (0 :: Term s PInteger))
+            (punsafeCoerce $ (PLC.MkNilData #) £ pcon PUnit))
+      -- Fields of the first sum choice
+      £ (pcon' $ PCons
+          a
+          (pcon' $ PCons
+            b
+            (pcon' PNil) ))
+  -}
+  pcon' = undefined
+  pmatch' dat f =
+    plet (pTrace "plu:pUnConstrData" $ (PLC.UnConstrData #) £ dat) $ \dat' ->
+      pmatch' (pTrace "plu:dat'" dat') $ \(PPair _n0 products :: PPair s) ->
+        plet (atIndex £ (0 :: Term s PInteger) £ products) $ \a ->
+          plet (atIndex £ (1 :: Term s PInteger) £ products) $ \b ->
+            f (ScriptContext (punsafeCoerce a) b)
+
+instance PlutusType TxInfo where
+  type PInner TxInfo _ = POpaque
+  pcon' = undefined
+  pmatch' dat f =
+    plet (pTrace "plu:pUnConstrData" $ (PLC.UnConstrData #) £ dat) $ \dat' ->
+      pmatch' (pTrace "plu:dat'" dat') $ \(PPair _ products :: PPair s) ->
+        plet (atIndex £ (7 :: Term s PInteger) £ products) $ \x ->
+          f (TxInfo $ (PLC.UnListData #) £ punsafeCoerce x)
+
+atIndex :: ClosedTerm (PInteger :--> POpaque :--> POpaque)
+atIndex =
+  pfix £$ plam $ \self n' list ->
+    pmatch' (pTrace "plu:n" list) $ \case
+      PNil -> pTrace "plu:atIndex:err" perror
+      PCons x xs ->
+        pif
+          (n' £== 0)
+          x
+          (self £ (n' - 1) £ xs)
+
 -- List functions
 
-hasElem :: forall s. Term s POpaque -> Term s POpaque -> Term s PBool
-hasElem k list' =
-  go £ list'
-  where
-    -- TODO: why can't i use phoistAcyclic  here?
-    go :: Term s (POpaque :--> PBool)
-    go =
-      pfix £$ plam $ \self list ->
-        pmatch' list $ \case
-          PNil -> pTrace "plu:hasElem:error" $ pcon PFalse
-          PCons x xs ->
-            pif
-              (k £== x)
-              (pcon PTrue)
-              (self £ xs)
-
-atProduct :: Term s PInteger -> Term s a -> Term s POpaque
-atProduct n dat =
-  plet (pTrace "plu:pUnConstrData" $ (PLC.UnConstrData #) £ punsafeCoerce dat) $ \dat' ->
-    pmatch' (pTrace "plu:dat'" dat') $ \(PPair _ products :: PPair s) ->
-      atIndex n products
-
-atIndex :: Term s PInteger -> Term s POpaque -> Term s POpaque
-atIndex n =
-  (go £ n £)
-  where
-    go :: Term s (PInteger :--> POpaque :--> POpaque)
-    go = phoistAcyclic $
-      pfix
-        £$ plam
-        $ \self n' list ->
-          pmatch' (pTrace "plu:n" list) $ \case
-            PNil -> pTrace "plu:atIndex:err" perror
-            PCons x xs ->
-              pif
-                (n' £== 0)
-                x
-                (self £ (n' - 1) £ xs)
+hasElem :: ClosedTerm (POpaque :--> POpaque :--> PBool)
+hasElem =
+  pfix £$ plam $ \self k list ->
+    pmatch' list $ \case
+      PNil -> pTrace "plu:hasElem:error" $ pcon PFalse
+      PCons x xs ->
+        pif
+          (k £== x)
+          (pcon PTrue)
+          (self £ k £ xs)
 
 -- All of these are working with `Data`
 
@@ -121,7 +151,7 @@ instance PlutusType PList where
 
 -- Trace
 
-pTrace :: forall a s. Text -> Term s a -> Term s a
+pTrace :: Text -> Term s a -> Term s a
 pTrace s f = pBuiltin PLC.Trace £ pfromText s £ f
 
 -- Builtins
@@ -144,8 +174,10 @@ class ForceLevel a where
 instance ForceLevel PLC.DefaultFun where
   forceLevel = \case
     PLC.EqualsData -> nat0
+    PLC.ConstrData -> nat0
     PLC.UnConstrData -> nat0
     PLC.UnListData -> nat0
+    PLC.IData -> nat0
     PLC.MkPairData -> nat0
     PLC.FstPair -> nat2
     PLC.SndPair -> nat2
@@ -154,4 +186,5 @@ instance ForceLevel PLC.DefaultFun where
     PLC.HeadList -> nat1
     PLC.TailList -> nat1
     PLC.Trace -> nat1
-    _ -> undefined
+    PLC.MkNilData -> nat0
+    x -> traceShow x undefined -- TODO: Use TypeError
