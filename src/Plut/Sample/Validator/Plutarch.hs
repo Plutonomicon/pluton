@@ -13,15 +13,15 @@
 module Plut.Sample.Validator.Plutarch (plutarchValidator) where
 
 import Data.Kind (Type)
-import Data.Nat (Nat (S, Z), nat0, nat1, nat2)
+import Data.Proxy (Proxy (..))
 import Data.Text (Text)
-import Debug.Trace
+import Data.Type.Nat
 import Ledger.Scripts (Validator (..))
 import Plutarch
 import Plutarch.Bool
 import Plutarch.ByteString
 import Plutarch.Integer
-import Plutarch.String (pfromText)
+import Plutarch.String (PString, pfromText)
 import Plutarch.Unit
 import PlutusCore qualified as PLC
 
@@ -29,8 +29,8 @@ plutarchValidator :: Validator
 plutarchValidator =
   Validator $ compile validator
 
-{- | TODO: Rewrite raw 'Untyped Plutarch' to use the types from typed eDSL
- Upstream the types to Plutarch
+{- | TODO: Gradually rewrite raw 'Untyped Plutarch' to use the types from typed
+ eDSL, and then upstream the types to Plutarch
 -}
 validator :: ClosedTerm (PByteString :--> PByteString :--> ScriptContext :--> PUnit)
 validator =
@@ -42,18 +42,18 @@ validator =
           plet (hasElem £ punsafeCoerce datum £ signatories) $ \(isBeneficiary :: Term s PBool) ->
             pif isBeneficiary (pcon PUnit) $ pTrace "plu:not-beneficiary" perror
 
--- EXP
-
 data ScriptContext s = ScriptContext
   { scriptContextTxInfo :: Term s TxInfo
-  , _scriptContextPurpose :: Term s POpaque
+  , -- TODO
+    _scriptContextPurpose :: Term s POpaque
   }
 
 data TxInfo s = TxInfo
   { txInfoSignatories :: Term s (PList POpaque)
+  -- TODO: other fields
   }
 
--- We first write instances by hand, then generalize.
+-- NOTE: We first write instances by hand, then latter will generalize for all sum and product types.
 instance PlutusType ScriptContext where
   type PInner ScriptContext b = ScriptContext
 
@@ -73,7 +73,7 @@ instance PlutusType ScriptContext where
   -}
   pcon' = undefined
   pmatch' dat f =
-    plet (pTrace "plu:pUnConstrData" $ PLC.UnConstrData #£ dat) $ \dat' ->
+    plet (pTrace "plu:pUnConstrData" $ (UnConstrData #£ punsafeCoerce dat)) $ \dat' ->
       pmatch' (pTrace "plu:dat'" dat') $ \(PPairData _n0 products :: PPairData PInteger (PList POpaque) s) ->
         plet (atIndex £ (0 :: Term s PInteger) £ products) $ \a ->
           -- TODO: Allow lazy retrieval of fields
@@ -84,17 +84,18 @@ instance PlutusType TxInfo where
   type PInner TxInfo _ = TxInfo
   pcon' = undefined
   pmatch' dat f =
-    plet (pTrace "plu:pUnConstrData" $ PLC.UnConstrData #£ dat) $ \dat' ->
+    plet (pTrace "plu:pUnConstrData" $ UnConstrData #£ punsafeCoerce dat) $ \dat' ->
       pmatch' (pTrace "plu:dat'" dat') $ \(PPairData _ products :: PPairData PInteger (PList POpaque) s) ->
+        -- TODO: hardcoding index
         plet (atIndex £ (7 :: Term s PInteger) £ products) $ \x ->
-          f (TxInfo $ PLC.UnListData #£ punsafeCoerce x)
+          f (TxInfo $ UnListData #£ punsafeCoerce x)
 
 -------------------------------
 -- To upstream (after clean up)
 -------------------------------
 instance PEq POpaque where
   a £== b =
-    pBuiltin PLC.EqualsData £ a £ b
+    EqualsData #£ a £ b
 
 -- Pair of Data
 
@@ -102,15 +103,16 @@ data PPairData a b s = PPairData (Term s a) (Term s b)
 
 instance PlutusType (PPairData a b) where
   type PInner (PPairData a b) _ = PPairData a b
-  pcon' (PPairData a b) = PLC.MkPairData #£ a £ b -- There is no MkPair
+  pcon' (PPairData a b) = MkPairData #£ a £ b -- There is no MkPair
   pmatch' pair f =
     -- TODO: use delay/force to avoid evaluating `pair` twice?
-    plet (PLC.FstPair #£ pair) $ \a ->
-      plet (PLC.SndPair #£ pair) $ \b ->
+    plet (FstPair #£ pair) $ \a ->
+      plet (SndPair #£ pair) $ \b ->
         f $ PPairData a b
 
 -- List
 
+-- TODO: Rename to PListData?
 data PList a s
   = PNil
   | PCons (Term s a) (Term s (PList a))
@@ -118,16 +120,16 @@ data PList a s
 instance PlutusType (PList a) where
   type PInner (PList a) _ = PList a
   pcon' PNil = undefined -- TODO??
-  pcon' (PCons x xs) = PLC.MkCons #£ x £ xs
+  pcon' (PCons x xs) = MkCons #£ x £ xs
   pmatch' list f =
-    plet (PLC.NullList #£ list) $ \isEmpty ->
+    plet (NullList #£ list) $ \isEmpty ->
       pif
         (punsafeCoerce isEmpty)
         (f PNil)
         $ plet
-          (PLC.HeadList #£ list)
+          (HeadList #£ list)
           ( \head ->
-              plet (PLC.TailList #£ list) $ \tail ->
+              plet (TailList #£ list) $ \tail ->
                 f $ PCons head tail
           )
 
@@ -153,44 +155,84 @@ atIndex =
           x
           (self £ (n' - 1) £ xs)
 
--- Trace
-
-pTrace :: Text -> Term s a -> Term s a
-pTrace s f = PLC.Trace #£ pfromText s £ f
-
 -- Builtins
 
--- | Builtin function application
-(#£) :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). PLC.DefaultFun -> Term s a -> Term s b
-(#£) f af = pBuiltin f £ af
+{- | Type spec for PLC's untyped builtin
 
-infixl 9 #£
+ The `forces` value determines the repeated application of `FORCE` when
+ evaluating the builtin function.
 
-pBuiltin :: PLC.DefaultFun -> Term s a
-pBuiltin builtin =
-  phoistAcyclic $ forceN (forceLevel builtin) $ punsafeBuiltin builtin
+ Example: UnConstrData #£ someData
+-}
+data PBuiltin (forces :: Nat) (args :: [k -> Type]) (res :: k -> Type) where
+  UnConstrData :: PBuiltin Nat0 '[POpaque] (PPairData PInteger (PList POpaque))
+  UnListData :: PBuiltin Nat0 '[POpaque] (PList POpaque)
+  MkPairData :: PBuiltin Nat0 '[a, b] (PPairData a b)
+  FstPair :: PBuiltin Nat2 '[PPairData a b] a
+  SndPair :: PBuiltin Nat2 '[PPairData a b] b
+  MkCons :: PBuiltin Nat1 '[a, PList a] (PList a)
+  NullList :: PBuiltin Nat1 '[a] PBool
+  HeadList :: PBuiltin Nat1 '[PList a] a
+  TailList :: PBuiltin Nat1 '[PList a] (PList a)
+  EqualsData :: PBuiltin Nat0 '[POpaque, POpaque] PBool
+  Trace :: PBuiltin Nat1 '[PString, a] a
+
+type family PBuiltinType (args :: [k -> Type]) (res :: k -> Type) where
+  PBuiltinType '[] res = res
+  PBuiltinType (a ': as) res = a :--> PBuiltinType as res
+
+pBuiltinTerm ::
+  forall args res forces s.
+  PBuiltin forces args res ->
+  Term s (PBuiltinType args res)
+pBuiltinTerm b =
+  phoistAcyclic $ case b of
+    UnConstrData ->
+      force @forces Proxy . punsafeBuiltin $ PLC.UnConstrData
+    UnListData ->
+      force @forces Proxy . punsafeBuiltin $ PLC.UnListData
+    MkPairData ->
+      force @forces Proxy . punsafeBuiltin $ PLC.MkPairData
+    FstPair ->
+      force @forces Proxy . punsafeBuiltin $ PLC.FstPair
+    SndPair ->
+      force @forces Proxy . punsafeBuiltin $ PLC.SndPair
+    MkCons ->
+      force @forces Proxy . punsafeBuiltin $ PLC.MkCons
+    NullList ->
+      force @forces Proxy . punsafeBuiltin $ PLC.NullList
+    HeadList ->
+      force @forces Proxy . punsafeBuiltin $ PLC.HeadList
+    TailList ->
+      force @forces Proxy . punsafeBuiltin $ PLC.TailList
+    EqualsData ->
+      force @forces Proxy . punsafeBuiltin $ PLC.EqualsData
+    Trace ->
+      force @forces Proxy . punsafeBuiltin $ PLC.Trace
   where
-    forceN :: Nat -> Term s a -> Term s a
+    force :: forall forces s a. SNatI forces => Proxy (forces :: Nat) -> Term s a -> Term s a
+    force Proxy =
+      let sn = snat :: SNat forces
+       in forceN (snatToNat sn)
+    forceN :: forall s a. Nat -> Term s a -> Term s a
     forceN Z = id
     forceN (S n) = pforce . punsafeCoerce . forceN n
 
-class ForceLevel a where
-  forceLevel :: a -> Nat
+pTrace :: Text -> Term s a -> Term s a
+pTrace s f = Trace #£ pfromText s £ f
 
-instance ForceLevel PLC.DefaultFun where
-  forceLevel = \case
-    PLC.EqualsData -> nat0
-    PLC.ConstrData -> nat0
-    PLC.UnConstrData -> nat0
-    PLC.UnListData -> nat0
-    PLC.IData -> nat0
-    PLC.MkPairData -> nat0
-    PLC.FstPair -> nat2
-    PLC.SndPair -> nat2
-    PLC.MkCons -> nat1
-    PLC.NullList -> nat1
-    PLC.HeadList -> nat1
-    PLC.TailList -> nat1
-    PLC.Trace -> nat1
-    PLC.MkNilData -> nat0
-    x -> traceShow x undefined -- TODO: Use TypeError
+(#£) ::
+  forall
+    k
+    (args :: [k -> Type])
+    (res :: k -> Type)
+    (a :: k -> Type)
+    (b :: k -> Type)
+    (forces :: Nat)
+    (s :: k).
+  (PBuiltinType args res ~ (a :--> b)) =>
+  PBuiltin forces args res ->
+  Term s a ->
+  Term s b
+(#£) b = (pBuiltinTerm b £)
+infixl 9 #£
