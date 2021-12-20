@@ -40,7 +40,7 @@ validator =
       pmatch' (scriptContextTxInfo ctx) $ \(txInfo :: TxInfo s) ->
         plet (txInfoSignatories txInfo) $ \signatories ->
           plet (hasElem £ punsafeCoerce datum £ signatories) $ \(isBeneficiary :: Term s PBool) ->
-            pif isBeneficiary (pcon PUnit) $ pTrace "plu:not-beneficiary" perror
+            pif isBeneficiary (pcon PUnit) $ "plu:not-beneficiary" !£ perror
 
 data ScriptContext s = ScriptContext
   { scriptContextTxInfo :: Term s TxInfo
@@ -73,8 +73,8 @@ instance PlutusType ScriptContext where
   -}
   pcon' = undefined
   pmatch' dat f =
-    plet (pTrace "plu:pUnConstrData" $ (UnConstrData #£ punsafeCoerce dat)) $ \dat' ->
-      pmatch' (pTrace "plu:dat'" dat') $ \(PPairData _n0 products :: PPairData PInteger (PList POpaque) s) ->
+    plet ("plu:pUnConstrData" !£ (UnConstrData #£ punsafeCoerce dat)) $ \dat' ->
+      pmatch' ("plu:dat'" !£ dat') $ \(PPairData _n0 products :: PPairData PInteger (PList POpaque) s) ->
         plet (atIndex £ (0 :: Term s PInteger) £ products) $ \a ->
           -- TODO: Allow lazy retrieval of fields
           plet (atIndex £ (1 :: Term s PInteger) £ products) $ \b ->
@@ -84,8 +84,8 @@ instance PlutusType TxInfo where
   type PInner TxInfo _ = TxInfo
   pcon' = undefined
   pmatch' dat f =
-    plet (pTrace "plu:pUnConstrData" $ UnConstrData #£ punsafeCoerce dat) $ \dat' ->
-      pmatch' (pTrace "plu:dat'" dat') $ \(PPairData _ products :: PPairData PInteger (PList POpaque) s) ->
+    plet ("plu:pUnConstrData" !£ UnConstrData #£ punsafeCoerce dat) $ \dat' ->
+      pmatch' ("plu:dat'" !£ dat') $ \(PPairData _ products :: PPairData PInteger (PList POpaque) s) ->
         -- TODO: hardcoding index
         plet (atIndex £ (7 :: Term s PInteger) £ products) $ \x ->
           f (TxInfo $ UnListData #£ punsafeCoerce x)
@@ -119,7 +119,7 @@ data PList a s
 
 instance PlutusType (PList a) where
   type PInner (PList a) _ = PList a
-  pcon' PNil = undefined -- TODO??
+  pcon' PNil = undefined -- TODO
   pcon' (PCons x xs) = MkCons #£ x £ xs
   pmatch' list f =
     plet (NullList #£ list) $ \isEmpty ->
@@ -137,7 +137,9 @@ hasElem :: PEq a => ClosedTerm (a :--> PList a :--> PBool)
 hasElem =
   pfix £$ plam $ \self k list ->
     pmatch' list $ \case
-      PNil -> pTrace "plu:hasElem:error" $ pcon PFalse
+      PNil ->
+        "plu:hasElem:fail"
+          !£ pcon PFalse
       PCons x xs ->
         pif
           (k £== x)
@@ -147,8 +149,10 @@ hasElem =
 atIndex :: ClosedTerm (PInteger :--> PList a :--> a)
 atIndex =
   pfix £$ plam $ \self n' list ->
-    pmatch' (pTrace "plu:n" list) $ \case
-      PNil -> pTrace "plu:atIndex:err" perror
+    pmatch' ("plu:n" !£ list) $ \case
+      PNil ->
+        "plu:atIndex:err"
+          !£ perror
       PCons x xs ->
         pif
           (n' £== 0)
@@ -218,9 +222,6 @@ pBuiltinTerm b =
     forceN Z = id
     forceN (S n) = pforce . punsafeCoerce . forceN n
 
-pTrace :: Text -> Term s a -> Term s a
-pTrace s f = Trace #£ pfromText s £ f
-
 (#£) ::
   forall
     k
@@ -236,3 +237,12 @@ pTrace s f = Trace #£ pfromText s £ f
   Term s b
 (#£) b = (pBuiltinTerm b £)
 infixl 9 #£
+
+-- Handy builtin aliases
+
+pTrace :: Text -> Term s a -> Term s a
+pTrace s f = Trace #£ pfromText s £ f
+
+(!£) :: forall k (s :: k) (a :: k -> Type). Text -> Term s a -> Term s a
+(!£) = pTrace
+infixl 8 !£
