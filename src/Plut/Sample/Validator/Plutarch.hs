@@ -15,7 +15,13 @@ module Plut.Sample.Validator.Plutarch (plutarchValidator) where
 import Ledger.Scripts (Validator (..))
 import Plutarch
 import Plutarch.Bool
-import Plutarch.Builtin
+import Plutarch.Builtin (
+  PList,
+  PPair (..),
+  (!£),
+ )
+import Plutarch.Builtin.Data ()
+import Plutarch.Builtin.Data.Type
 import Plutarch.Builtin.List qualified as BL
 import Plutarch.Builtin.Pair qualified as BP
 import Plutarch.ByteString
@@ -42,11 +48,11 @@ validator =
 data ScriptContext s = ScriptContext
   { scriptContextTxInfo :: Term s TxInfo
   , -- TODO
-    _scriptContextPurpose :: Term s POpaque
+    _scriptContextPurpose :: Term s PData
   }
 
 data TxInfo s = TxInfo
-  { txInfoSignatories :: Term s (PList POpaque)
+  { txInfoSignatories :: Term s (PList PData)
   -- TODO: other fields
   }
 
@@ -70,24 +76,29 @@ instance PlutusType ScriptContext where
   -}
   pcon' = undefined
   pmatch' dat f =
-    plet ("plu:pUnConstrData" !£ (UnConstrData #£ punsafeCoerce dat)) $ \dat' ->
-      BP.matchPair ("plu:dat'" !£ dat') $ \(PPair _n0 products :: PPair PInteger (PList POpaque) s) ->
-        plet (BL.atIndex £ (0 :: Term s PInteger) £ products) $ \a ->
-          -- TODO: Allow lazy retrieval of fields
-          plet (BL.atIndex £ (1 :: Term s PInteger) £ products) $ \b ->
-            f (ScriptContext (punsafeCoerce a) b)
+    pmatch (punsafeCoerce dat) $ \case
+      PDataConstr pair ->
+        BP.matchPair pair $ \(PPair _n0 products :: PPair PInteger (PList PData) s) ->
+          plet (BL.atIndex £ (0 :: Term s PInteger) £ products) $ \a ->
+            -- TODO: Allow lazy retrieval of fields
+            plet (BL.atIndex £ (1 :: Term s PInteger) £ products) $ \b ->
+              f (ScriptContext (punsafeCoerce a) b)
+      _ ->
+        perror
 
 instance PlutusType TxInfo where
   type PInner TxInfo _ = TxInfo
   pcon' = undefined
   pmatch' dat f =
-    plet ("plu:pUnConstrData" !£ UnConstrData #£ punsafeCoerce dat) $ \dat' ->
-      BP.matchPair ("plu:dat'" !£ dat') $ \(PPair _ products :: PPair PInteger (PList POpaque) s) ->
-        -- TODO: hardcoding index
-        plet (BL.atIndex £ (7 :: Term s PInteger) £ products) $ \x ->
-          f (TxInfo $ UnListData #£ punsafeCoerce x)
-
--- TODO: Drop this after switching to PData from Plutarch
-instance PEq POpaque where
-  a £== b =
-    EqualsData #£ a £ b
+    pmatch (punsafeCoerce dat) $ \case
+      PDataConstr pair ->
+        BP.matchPair pair $ \(PPair _n0 products :: PPair PInteger (PList PData) s) ->
+          -- TODO: hardcoding index
+          plet (BL.atIndex £ (7 :: Term s PInteger) £ products) $ \x ->
+            pmatch' x $ \case
+              PDataList xs ->
+                f (TxInfo xs)
+              _ ->
+                perror
+      _ ->
+        perror

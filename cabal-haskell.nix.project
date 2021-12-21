@@ -263,4 +263,4 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/srid/plutarch
-  tag: fa0aaf898079aba436603714c05f34e7d2276542
+  tag: 8eff2004e22b62d0dcae6fd64a18dc2e74f434d0
