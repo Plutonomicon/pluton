@@ -29,11 +29,10 @@ common common
     -Wmissing-export-lists -Werror -Wincomplete-record-updates
     -Wmissing-deriving-strategies -Wno-name-shadowing
 
-executable pluton
-  import:         common
-  hs-source-dirs: src
-  main-is:        Main.hs
-  other-modules:
+library
+  import:          common
+  hs-source-dirs:  src
+  exposed-modules:
     Pluton.Sample.Offchain
     Pluton.Sample.Test
     Pluton.Sample.Validator.Haskell
@@ -68,3 +67,25 @@ executable pluton
     , tasty-hedgehog
     , tasty-quickcheck
     , text
+
+executable pluton
+  import:         common
+  hs-source-dirs: exe
+  main-is:        Main.hs
+  build-depends:
+    , base
+    , pluton
+    , plutus-contract
+    , plutus-core
+
+benchmark perf
+  import:         common 
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: bench
+  main-is:        Bench.hs 
+  build-depends:
+    , base
+    , criterion
+    , pluton
+    , plutus-contract
+    , plutus-core
