@@ -32,6 +32,7 @@ main =
     cfg =
       defaultConfig
         { reportFile = Just "bench.html",
-          -- The JSON report is potentially useful for CI jobs.
-          jsonFile = Just "bench.json"
+          -- The JSON/CSV reports are potentially useful for CI jobs.
+          jsonFile = Just "bench.json",
+          csvFile = Just "bench.csv"
         }
