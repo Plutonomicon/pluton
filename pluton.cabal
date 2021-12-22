@@ -1,5 +1,5 @@
 cabal-version:      2.4
-name:               plut
+name:               pluton
 version:            0.1.0
 author:             Ardana Labs
 maintainer:         Sridhar Ratnakumar <srid@srid.ca>
@@ -25,15 +25,16 @@ common common
     -Wmissing-export-lists -Werror -Wincomplete-record-updates
     -Wmissing-deriving-strategies -Wno-name-shadowing
 
-executable plut
+executable pluton
   import:         common
   hs-source-dirs: src
   main-is:        Main.hs
   other-modules:
-    Plut.Sample.Offchain
-    Plut.Sample.Validator.Haskell
-    Plut.Sample.Validator.Plutarch
-    Plut.Sample.Validator.Pluto
+    Pluton.Sample.Offchain
+    Pluton.Sample.Test
+    Pluton.Sample.Validator.Haskell
+    Pluton.Sample.Validator.Plutarch
+    Pluton.Sample.Validator.Pluto
 
   build-depends:
     , base

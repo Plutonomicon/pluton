@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Plut.Sample.Validator.Pluto (plutoValidator) where
+module Pluton.Sample.Validator.Pluto (plutoValidator) where
 
 import Ledger.Scripts (Validator (..))
 import PlutusCore.Assembler.Assemble qualified as Pluto
@@ -10,7 +10,7 @@ import PlutusCore.Assembler.Types.AST qualified as Pluto
 -- FIXME: This is known to trigger a HLS bug with symbol resolution
 -- See https://github.com/haskell/haskell-language-server/issues/1737#issuecomment-825516365
 plutoValidatorProg :: Pluto.Program ()
-plutoValidatorProg = $(PlutoFFI.load "src/Plut/Sample/Validator/validator.pluto")
+plutoValidatorProg = $(PlutoFFI.load "src/Pluton/Sample/Validator/validator.pluto")
 
 plutoValidator :: Validator
 plutoValidator =
