@@ -7,7 +7,7 @@
 --
 -- To define the type of a particular builtin, write a type instance for
 -- `PBuiltinType`. This enables `pBuiltin` to be used on that PLC builtin:
--- 
+--
 -- @(pBuiltin @'PLC.UnIData @'[] £ someData)@
 module Pluton.Types.Builtin
   ( pBuiltin,
@@ -29,12 +29,14 @@ class PBuiltin (builtin :: PLC.DefaultFun) as where
 type family PBuiltinType (builtin :: PLC.DefaultFun) (as :: [k -> Type]) :: k -> Type
 
 type family Length (l :: [k]) :: Nat
+
 type instance Length '[] = 'Z
+
 type instance Length (x : xs) = 'S (Length xs)
 
--- | Type-safe version of `punsafeBuiltin` 
+-- | Type-safe version of `punsafeBuiltin`
 --
--- Use as: pBuiltin @'PLC.AddInteger @'[] 
+-- Use as: pBuiltin @'PLC.AddInteger @'[]
 --
 -- The second type argument is the list of polymorphic vars in the builtin.
 pBuiltin ::
@@ -125,5 +127,3 @@ instance PBuiltin 'PLC.Trace a where
   pBuiltinVal = PLC.Trace
 
 type instance PBuiltinType 'PLC.Trace '[a] = PString :--> a :--> a
-
-

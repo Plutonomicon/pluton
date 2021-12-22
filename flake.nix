@@ -39,7 +39,7 @@
 
             nativeBuildInputs = [
               pkgs.nixpkgs-fmt
-              # pkgs.ormolu
+              pkgs.ormolu
               # pkgs.haskellPackages.cabal-fmt
               # pkgs.hlint
               # pkgs.ghcid
@@ -49,7 +49,6 @@
               cabal = { };
               ghcid = { };
               hlint = { };
-              fourmolu = { };
               cabal-fmt = { };
               haskell-language-server = { }; # Must use haskell.nix, because the compiler version should match
             };
