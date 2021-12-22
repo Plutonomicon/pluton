@@ -1,3 +1,6 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE FlexibleContexts #-}
+
 module Pluton.Types.Builtin (
   pTrace,
   (#£),
@@ -24,31 +27,30 @@ import PlutusCore qualified as PLC
 class PPBuiltin (builtin :: PLC.DefaultFun) where
   type PPBuiltinType builtin :: k -> Type
   type PPBuiltinForce builtin :: Nat
-  ppBuiltinVal :: Proxy builtin -> PLC.DefaultFun
+  ppBuiltinVal :: PLC.DefaultFun
 
 instance PPBuiltin 'PLC.IData where
   type PPBuiltinType 'PLC.IData = PInteger :--> PData
   type PPBuiltinForce 'PLC.IData = 'Z
-  ppBuiltinVal Proxy = PLC.IData
+  ppBuiltinVal = PLC.IData
 
 ppBuiltin ::
-  forall builtin forces s.
-  (PPBuiltin builtin, forces ~ PPBuiltinForce builtin, SNatI forces) =>
-  Proxy builtin ->
+  forall builtin s.
+  (PPBuiltin builtin, SNatI (PPBuiltinForce builtin)) =>
   Term s (PPBuiltinType builtin)
-ppBuiltin Proxy =
-  force @forces Proxy . punsafeBuiltin $ ppBuiltinVal @builtin Proxy
+ppBuiltin =
+  force . punsafeBuiltin $ ppBuiltinVal @builtin
   where
-    force :: forall forces s a. SNatI forces => Proxy (forces :: Nat) -> Term s a -> Term s a
-    force Proxy =
-      let sn = snat :: SNat forces
+    force :: Term s a -> Term s a
+    force =
+      let sn = snat :: SNat (PPBuiltinForce builtin)
        in forceN (snatToNat sn)
     forceN :: forall s a. Nat -> Term s a -> Term s a
     forceN Z = id
     forceN (S n) = pforce . punsafeCoerce . forceN n
 
 ppIData :: forall k (s :: k). Term s (PInteger :--> PData)
-ppIData = ppBuiltin @'PLC.IData Proxy
+ppIData = ppBuiltin @( 'PLC.IData) -- fourmolu crashes without these paratheses
 
 {- | Type spec for PLC's untyped builtin functions
 
