@@ -4,10 +4,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE PostfixOperators #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module Pluton.Sample.Validator.Plutarch (plutarchValidator) where
@@ -15,18 +12,18 @@ module Pluton.Sample.Validator.Plutarch (plutarchValidator) where
 import Ledger.Scripts (Validator (..))
 import Plutarch
 import Plutarch.Bool
-import Plutarch.Builtin (
+import Plutarch.ByteString
+import Plutarch.Integer
+import Plutarch.Unit
+import Pluton.Types.Builtin (
   PList,
   PPair (..),
   (!£),
  )
-import Plutarch.Builtin.Data ()
-import Plutarch.Builtin.Data.Type
-import Plutarch.Builtin.List qualified as BL
-import Plutarch.Builtin.Pair qualified as BP
-import Plutarch.ByteString
-import Plutarch.Integer
-import Plutarch.Unit
+import Pluton.Types.Builtin.Data ()
+import Pluton.Types.Builtin.Data.Type
+import Pluton.Types.Builtin.List qualified as BL
+import Pluton.Types.Builtin.Pair qualified as BP
 
 plutarchValidator :: Validator
 plutarchValidator =

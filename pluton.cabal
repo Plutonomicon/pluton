@@ -12,12 +12,16 @@ common common
   default-extensions:
     DataKinds
     DerivingStrategies
+    GADTs
     ImportQualifiedPost
     LambdaCase
     OverloadedStrings
+    PolyKinds
     RankNTypes
+    ScopedTypeVariables
     TypeApplications
     TypeFamilies
+    TypeOperators
     ViewPatterns
 
   ghc-options:
@@ -35,6 +39,13 @@ executable pluton
     Pluton.Sample.Validator.Haskell
     Pluton.Sample.Validator.Plutarch
     Pluton.Sample.Validator.Pluto
+    Pluton.Types.Builtin
+    Pluton.Types.Builtin.Data
+    Pluton.Types.Builtin.Data.Type
+    Pluton.Types.Builtin.List
+    Pluton.Types.Builtin.List.Type
+    Pluton.Types.Builtin.Pair
+    Pluton.Types.Builtin.Pair.Type
 
   build-depends:
     , base
