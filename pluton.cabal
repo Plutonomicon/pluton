@@ -54,7 +54,7 @@ executable pluton
     , hedgehog
     , lens
     , mtl
-    , plutarch
+    , plutarch           >=1.0
     , pluto
     , plutus-contract
     , plutus-core

@@ -28,8 +28,8 @@ matchPair ::
   Term s c
 matchPair pair f =
   -- TODO: use delay/force to avoid evaluating `pair` twice?
-  plet (fstPair £ pair) $ \a ->
-    plet (sndPair £ pair) $ \b ->
+  plet (fstPair # pair) $ \a ->
+    plet (sndPair # pair) $ \b ->
       f $ PPair a b
 
 fstPair :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). Term s (PPair a b :--> a)
