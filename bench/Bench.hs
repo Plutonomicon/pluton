@@ -29,4 +29,9 @@ main =
         ]
     ]
   where
-    cfg = defaultConfig {reportFile = Just "bench.html"}
+    cfg =
+      defaultConfig
+        { reportFile = Just "bench.html",
+          -- The JSON report is potentially useful for CI jobs.
+          jsonFile = Just "bench.json"
+        }
