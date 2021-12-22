@@ -111,8 +111,7 @@
             "https://github.com/input-output-hk/Win32-network"."2d1a01c7cbb9f68a1aefe2934aad6c70644ebfea" = "sha256-uvYEWalN62ETpH45/O7lNHo4rAIaJtYpLWdIcAkq3dA=";
             "https://github.com/input-output-hk/goblins"."cde90a2b27f79187ca8310b6549331e59595e7ba" = "z9ut0y6umDIjJIRjz9KSvKgotuw06/S8QDwOtVdGiJ0=";
             "https://github.com/Plutonomicon/pluto"."6546ff776ba811966af3a975938ada69c61f01ec" = "sha256-J1AHljKWjlmNMz/VfPxZ13e/f5S5fmlUW0b9jTTugAY";
-            "https://github.com/srid/plutarch"."8eff2004e22b62d0dcae6fd64a18dc2e74f434d0" =
-              "sha256-m2/Mq9eLcaMO7b/6OTatGHnVaF27Mli3zNrE1JAE8V0=";
+            "https://github.com/Plutonomicon/plutarch"."9c3c4d9af4ac312cd916353c1c31692bac3f7a85" = "sha256-milRRiKO0JBZNnnLyEs0sFkWUDvT78reAYMLJtuKxrM=";
           };
         };
     in
