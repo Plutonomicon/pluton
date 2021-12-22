@@ -1,16 +1,15 @@
-# plut
+# pluton
 
 **Work in Progress**
 
-Compare [Pluto](https://github.com/Plutonomicon/pluto) and [Plutarch](https://github.com/Plutonomicon/plutarch), via small examples and sample contracts, along the axis of developer ergonomics as well as generated script size.
+Pluton is intended to:
 
-## Tasks 
-
-- [x] Untyped Plutarch validator
-- [ ] Plutarch: ScriptContext types
-- [ ] Typed Plutarch validator
+- enrich [Plutarch](https://github.com/Plutonomicon/plutarch) to enable a more ergonomic DSL for writing smart contracts. It is a staging ground for these features to eventually be upstreamed to Plutarch. 
+- Benchmark (script size, cpu/mem cost) functions and smart contracts written in Haskell, Plutarch and [Pluto](https://github.com/Plutonomicon/pluto), and use that as a guide for enrichment.
 
 ## Developing
+
+`nix develop` should get a dev environment with Haskell Language Server support and ghcid.
 
 If you are developing with VSCode, [`nix-direnv`](https://github.com/nix-community/nix-direnv) is recommended. Using home-manager, you can install it as follows:
 

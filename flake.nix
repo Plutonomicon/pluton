@@ -1,5 +1,5 @@
 {
-  description = "plut";
+  description = "pluton";
 
   inputs = {
     haskell-nix.url = "github:input-output-hk/haskell.nix";

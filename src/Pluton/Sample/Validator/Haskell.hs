@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# OPTIONS_GHC -fplugin-opt PlutusTx.Plugin:defer-errors #-}
 
-module Plut.Sample.Validator.Haskell (haskellValidator) where
+module Pluton.Sample.Validator.Haskell (haskellValidator) where
 
 import Ledger (Validator, mkValidatorScript)
 import Ledger.Contexts (

@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -fplugin-opt PlutusTx.Plugin:defer-errors #-}
 
-module Plut.Sample.Offchain (
+module Pluton.Sample.Offchain (
   endpoints,
   GiftSchema,
 ) where

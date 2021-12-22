@@ -10,7 +10,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
-module Plut.Sample.Validator.Plutarch (plutarchValidator) where
+module Pluton.Sample.Validator.Plutarch (plutarchValidator) where
 
 import Ledger.Scripts (Validator (..))
 import Plutarch
