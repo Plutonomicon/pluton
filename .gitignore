@@ -1,5 +1,6 @@
 dist-newstyle
 .direnv
+result
 
 # bench/
 bench.html
