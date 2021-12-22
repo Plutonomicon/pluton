@@ -76,7 +76,7 @@ instance ListElemUni (a :: k -> Type) => PlutusType (PList a) where
     punsafeConstant $
       PLC.Some $
         PLC.ValueOf (PLC.DefaultUniList $ listElemUni (Proxy :: Proxy a)) []
-  pcon' (PCons x xs) = B.pBuiltin @'PLC.MkCons @'[a] £ x £ xs
+  pcon' (PCons x xs) = B.pBuiltin @'PLC.MkCons @'[a] # x # xs
   pmatch' = pmatchList
 
 type instance PBuiltinType 'PLC.MkCons '[a] = a :--> PList a :--> PList a
@@ -89,14 +89,14 @@ type instance PBuiltinType 'PLC.TailList '[a] = PList a :--> PList a
 
 pmatchList :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). Term s (PList a) -> (PList a s -> Term s b) -> Term s b
 pmatchList list f =
-  plet (B.pBuiltin @'PLC.NullList @'[a] £ list) $ \isEmpty ->
+  plet (B.pBuiltin @'PLC.NullList @'[a] # list) $ \isEmpty ->
     pif
       (punsafeCoerce isEmpty)
       (f PNil)
       $ plet
-        (B.pBuiltin @'PLC.HeadList @'[a] £ list)
+        (B.pBuiltin @'PLC.HeadList @'[a] # list)
         ( \head ->
-            plet (B.pBuiltin @'PLC.TailList @'[a] £ list) $ \tail ->
+            plet (B.pBuiltin @'PLC.TailList @'[a] # list) $ \tail ->
               f $ PCons head tail
         )
 
@@ -128,35 +128,35 @@ singleton =
 -- | Return True if the list contains the given element.
 contains :: (PEq a, ListElemUni a) => ClosedTerm (PList a :--> a :--> PBool)
 contains =
-  pfix £$ plam $ \self list k ->
+  pfix #$ plam $ \self list k ->
     pmatch' list $ \case
       PNil ->
         pcon PFalse
       PCons x xs ->
         pif
-          (k £== x)
+          (k #== x)
           (pcon PTrue)
-          (self £ xs £ k)
+          (self # xs # k)
 
 -- | Return the element at given index; fail otherwise.
 atIndex :: ListElemUni a => ClosedTerm (PInteger :--> PList a :--> a)
 atIndex =
-  pfix £$ plam $ \self n' list ->
+  pfix #$ plam $ \self n' list ->
     pmatch' list $ \case
       PNil ->
         perror
       PCons x xs ->
         pif
-          (n' £== 0)
+          (n' #== 0)
           x
-          (self £ (n' - 1) £ xs)
+          (self # (n' - 1) # xs)
 
 -- | Append two lists
 append :: ListElemUni a => ClosedTerm (PList a :--> PList a :--> PList a)
 append =
-  pfix £$ plam $ \self list1 list2 ->
+  pfix #$ plam $ \self list1 list2 ->
     pmatch' list1 $ \case
       PNil ->
         list2
       PCons x xs ->
-        pcon' (PCons x $ self £ xs £ list2)
+        pcon' (PCons x $ self # xs # list2)

@@ -65,31 +65,31 @@ instance PlutusType PData where
   type PInner PData _ = PData
   pcon' = \case
     PDataConstr pair ->
-      B.pBuiltin @'PLC.ConstrData @'[] £ pair
+      B.pBuiltin @'PLC.ConstrData @'[] # pair
     PDataMap m ->
-      B.pBuiltin @'PLC.MapData @'[] £ m
+      B.pBuiltin @'PLC.MapData @'[] # m
     PDataList l ->
-      B.pBuiltin @'PLC.ListData @'[] £ l
+      B.pBuiltin @'PLC.ListData @'[] # l
     PDataInteger i ->
-      B.pBuiltin @'PLC.IData @'[] £ i
+      B.pBuiltin @'PLC.IData @'[] # i
     PDataByteString bs ->
-      B.pBuiltin @'PLC.BData @'[] £ bs
+      B.pBuiltin @'PLC.BData @'[] # bs
   pmatch' :: forall s c. (forall b. Term s (PInner PData b)) -> (PData s -> Term s c) -> Term s c
   pmatch' x f =
     pforce $
-      B.pBuiltin @'PLC.ChooseData @'[PDelayed c] £ x
-        £ pdelay (f (PDataConstr (B.pBuiltin @'PLC.UnConstrData @'[] £ x)))
-        £ pdelay (f (PDataMap (B.pBuiltin @'PLC.UnMapData @'[] £ x)))
-        £ pdelay (f (PDataList (B.pBuiltin @'PLC.UnListData @'[] £ x)))
-        £ pdelay (f (PDataInteger (B.pBuiltin @'PLC.UnIData @'[] £ x)))
-        £ pdelay (f (PDataByteString (B.pBuiltin @'PLC.UnBData @'[] £ x)))
+      B.pBuiltin @'PLC.ChooseData @'[PDelayed c] # x
+        # pdelay (f (PDataConstr (B.pBuiltin @'PLC.UnConstrData @'[] # x)))
+        # pdelay (f (PDataMap (B.pBuiltin @'PLC.UnMapData @'[] # x)))
+        # pdelay (f (PDataList (B.pBuiltin @'PLC.UnListData @'[] # x)))
+        # pdelay (f (PDataInteger (B.pBuiltin @'PLC.UnIData @'[] # x)))
+        # pdelay (f (PDataByteString (B.pBuiltin @'PLC.UnBData @'[] # x)))
 
 instance ListElemUni PData where
   type ListElemType PData = PLC.Data
   listElemUni Proxy = PLC.DefaultUniData
 
 instance PEq PData where
-  a £== b = B.pBuiltin @'PLC.EqualsData @'[] £ a £ b
+  a #== b = B.pBuiltin @'PLC.EqualsData @'[] # a # b
 
 -- This instance is for Data only, because `MkPairData` is the only way to
 -- construct a pair. If you want to use a polymorphic pair, use `matchPair`
@@ -97,11 +97,11 @@ instance PEq PData where
 instance PlutusType (PPair PData PData) where
   type PInner (PPair PData PData) _ = PPair PData PData
   pcon' (PPair a b) =
-    pBuiltin @'PLC.MkPairData @'[] £ a £ b -- There is no MkPair
+    pBuiltin @'PLC.MkPairData @'[] # a # b -- There is no MkPair
   pmatch' = matchPair
 
 type instance PBuiltinType 'PLC.MkPairData '[] = PData :--> PData :--> PPair PData PData
 
 -- | Create a `Pair` of `Data` values.
 mkPairData :: forall k (s :: k). Term s PData -> Term s PData -> Term s (PPair PData PData)
-mkPairData x y = pBuiltin @'PLC.MkPairData @'[] £ x £ y
+mkPairData x y = pBuiltin @'PLC.MkPairData @'[] # x # y

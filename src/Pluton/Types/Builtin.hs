@@ -8,7 +8,7 @@
 -- To define the type of a particular builtin, write a type instance for
 -- `PBuiltinType`. This enables `pBuiltin` to be used on that PLC builtin:
 --
--- @(pBuiltin @'PLC.UnIData @'[] £ someData)@
+-- @(pBuiltin @'PLC.UnIData @'[] # someData)@
 module Pluton.Types.Builtin
   ( pBuiltin,
     PBuiltinType,
@@ -57,7 +57,7 @@ pBuiltin =
     forceN (S n) = pforce . punsafeCoerce . forceN n
 
 pTrace :: forall a s. Text -> Term s a -> Term s a
-pTrace s f = pBuiltin @('PLC.Trace) @'[a] £ pfromText s £ f
+pTrace s f = pBuiltin @('PLC.Trace) @'[a] # pfromText s # f
 
 (!#) :: forall k (s :: k) (a :: k -> Type). Text -> Term s a -> Term s a
 (!#) = pTrace
