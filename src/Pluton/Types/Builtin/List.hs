@@ -79,7 +79,6 @@ instance ListElemUni (a :: k -> Type) => PlutusType (PList a) where
   pcon' (PCons x xs) = B.pBuiltin @'PLC.MkCons @'[a] £ x £ xs
   pmatch' = pmatchList
 
-
 type instance PBuiltinType 'PLC.MkCons '[a] = a :--> PList a :--> PList a
 
 type instance PBuiltinType 'PLC.NullList '[a] = PList a :--> PBool

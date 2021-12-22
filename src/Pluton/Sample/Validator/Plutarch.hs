@@ -26,9 +26,8 @@ plutarchValidator :: Validator
 plutarchValidator =
   Validator $ compile validator
 
-{- | TODO: Gradually rewrite raw 'Untyped Plutarch' to use the types from typed
- eDSL, and then upstream the types to Plutarch
--}
+-- | TODO: Gradually rewrite raw 'Untyped Plutarch' to use the types from typed
+-- eDSL, and then upstream the types to Plutarch
 validator :: ClosedTerm (PByteString :--> PByteString :--> ScriptContext :--> PUnit)
 validator =
   plam $ \datum (_redeemer :: Term s PByteString) ctxT ->
@@ -40,8 +39,8 @@ validator =
             pif isBeneficiary (pcon PUnit) $ "plu:not-beneficiary" !# perror
 
 data ScriptContext s = ScriptContext
-  { scriptContextTxInfo :: Term s TxInfo
-  , -- TODO
+  { scriptContextTxInfo :: Term s TxInfo,
+    -- TODO
     _scriptContextPurpose :: Term s PData
   }
 

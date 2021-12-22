@@ -35,8 +35,8 @@ import Wallet.Emulator.Wallet (Wallet, knownWallets)
 -- -------------------------------------------------------------------------- --
 
 data SampleModel = SampleModel
-  { _giftAmount :: Integer
-  , _giftBeneficiary :: Maybe Wallet
+  { _giftAmount :: Integer,
+    _giftBeneficiary :: Maybe Wallet
   }
   deriving stock (Prelude.Eq, Prelude.Show)
 
@@ -59,8 +59,8 @@ instance PCT.ContractModel SampleModel where
     let minAda = 2
         val = (1000000 *) Prelude.<$> QC.choose @Integer (minAda, 5)
     QC.oneof
-      [ Prelude.fmap (Give wallet beneficiary) val
-      , Prelude.pure $ Grab wallet
+      [ Prelude.fmap (Give wallet beneficiary) val,
+        Prelude.pure $ Grab wallet
       ]
 
   initialState :: SampleModel
@@ -136,9 +136,9 @@ smokeTrace validator = do
 tests :: IO ()
 tests = do
   let validators =
-        [ ("Haskell", haskellValidator)
-        , ("Pluto", plutoValidator)
-        , ("Plutarch", plutarchValidator)
+        [ ("Haskell", haskellValidator),
+          ("Pluto", plutoValidator),
+          ("Plutarch", plutarchValidator)
         ]
   T.defaultMain $
     T.localOption (H.HedgehogTestLimit (Just 10)) . T.localOption (H.HedgehogShrinkLimit (Just 2)) $
@@ -146,6 +146,6 @@ tests = do
         flip fmap validators $ \(k, validator) ->
           T.testGroup
             ("Validator:" <> k)
-            [ QC.testProperty "contract" (modelCheck validator)
-            , QC.testProperty "nofundslocked" (noFundsLocked validator)
+            [ QC.testProperty "contract" (modelCheck validator),
+              QC.testProperty "nofundslocked" (noFundsLocked validator)
             ]

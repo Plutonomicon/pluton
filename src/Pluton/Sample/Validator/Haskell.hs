@@ -5,10 +5,10 @@
 module Pluton.Sample.Validator.Haskell (haskellValidator) where
 
 import Ledger (Validator, mkValidatorScript)
-import Ledger.Contexts (
-  ScriptContext (scriptContextTxInfo),
-  txSignedBy,
- )
+import Ledger.Contexts
+  ( ScriptContext (scriptContextTxInfo),
+    txSignedBy,
+  )
 import PlutusTx qualified
 import PlutusTx.Prelude
 

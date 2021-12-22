@@ -3,10 +3,11 @@
 {-# LANGUAGE TypeOperators #-}
 {-# OPTIONS_GHC -fplugin-opt PlutusTx.Plugin:defer-errors #-}
 
-module Pluton.Sample.Offchain (
-  endpoints,
-  GiftSchema,
-) where
+module Pluton.Sample.Offchain
+  ( endpoints,
+    GiftSchema,
+  )
+where
 
 import Control.Monad (forever, void)
 import Data.Map as Map
@@ -60,6 +61,6 @@ endpoints :: Validator -> Contract () GiftSchema Text ()
 endpoints v =
   forever $
     selectList
-      [ endpoint @"give" (give v)
-      , endpoint @"grab" (const $ grab v)
+      [ endpoint @"give" (give v),
+        endpoint @"grab" (const $ grab v)
       ]
