@@ -1,5 +1,14 @@
 # pluton
 
+[![Hercules-ci][Herc badge]][Herc link]
+[![Cachix Cache][Cachix badge]][Cachix link]
+[![Built with Nix][Built with Nix badge]][Built with Nix link]
+
+[Herc badge]: https://img.shields.io/badge/ci--by--hercules-green.svg
+[Herc link]: https://hercules-ci.com/github/Plutonomicon/pluton
+[Cachix badge]: https://img.shields.io/badge/cachix-public--plutonomicon-blue.svg
+[Cachix link]: https://public-plutonomicon.cachix.org 
+
 **Work in Progress**
 
 Pluton is intended to:
@@ -26,5 +35,15 @@ programs.direnv = {
 In a nix-shell, run:
 
 ```
-cabal run
+cabal run pluton
 ```
+
+## Benchmarks
+
+Note: Benchmarks are not implemented yet. This is only a placeholder.
+
+```
+cabal bench
+```
+
+This will write the benchmark report to `report.html`.
