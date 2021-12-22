@@ -16,8 +16,6 @@ import PlutusCore qualified as PLC
 -- | A builtin pair type.
 data PPair a b s = PPair (Term s a) (Term s b)
 
-type instance PBuiltinType 'PLC.MkPairData '[a, b] = a :--> b :--> PPair a b
-
 type instance PBuiltinType 'PLC.FstPair '[a, b] = PPair a b :--> a
 
 type instance PBuiltinType 'PLC.SndPair '[a, b] = PPair a b :--> b

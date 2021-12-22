@@ -1,4 +1,5 @@
 {-# LANGUAGE ImportQualifiedPost #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
@@ -14,7 +15,6 @@ import Plutarch
 import Plutarch.Bool (PBool, PEq (..))
 import Plutarch.ByteString (PByteString)
 import Plutarch.Integer (PInteger)
-import Plutarch.Prelude (Type)
 import Pluton.Types.Builtin
 import Pluton.Types.Builtin qualified as B
 import Pluton.Types.Builtin.List
@@ -94,17 +94,14 @@ instance PEq PData where
 -- This instance is for Data only, because `MkPairData` is the only way to
 -- construct a pair. If you want to use a polymorphic pair, use `matchPair`
 -- directly.
-instance (a ~ PData, b ~ PData) => PlutusType (PPair a b) where
-  type PInner (PPair a b) _ = PPair a b
+instance PlutusType (PPair PData PData) where
+  type PInner (PPair PData PData) _ = PPair PData PData
   pcon' (PPair a b) =
-    pBuiltin @'PLC.MkPairData @'[a, b] £ a £ b -- There is no MkPair
+    pBuiltin @'PLC.MkPairData @'[] £ a £ b -- There is no MkPair
   pmatch' = matchPair
 
+type instance PBuiltinType 'PLC.MkPairData '[] = PData :--> PData :--> PPair PData PData
+
 -- | Create a `Pair` of `Data` values.
-mkPairData ::
-  forall k (s :: k) (a :: k -> Type) (b :: k -> Type).
-  (a ~ PData, b ~ PData) =>
-  Term s a ->
-  Term s b ->
-  Term s (PPair a b)
-mkPairData x y = pcon' $ PPair x y
+mkPairData :: forall k (s :: k). Term s PData -> Term s PData -> Term s (PPair PData PData)
+mkPairData x y = pBuiltin @'PLC.MkPairData @'[] £ x £ y
