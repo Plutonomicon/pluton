@@ -77,35 +77,36 @@ instance ListElemUni (a :: k -> Type) => PlutusType (PList a) where
     punsafeConstant $
       PLC.Some $
         PLC.ValueOf (PLC.DefaultUniList $ listElemUni (Proxy :: Proxy a)) []
-  pcon' (PCons x xs) = B.ppBuiltin @'PLC.MkCons @'[a] £ x £ xs
+  pcon' (PCons x xs) = B.pBuiltin @'PLC.MkCons @'[a] £ x £ xs
   pmatch' = pmatchList
 
-type instance PPBuiltinType 'PLC.MkCons '[a] = a :--> PList a :--> PList a
 
-type instance PPBuiltinForce 'PLC.MkCons = Nat0
+type instance PBuiltinType 'PLC.MkCons '[a] = a :--> PList a :--> PList a
 
-type instance PPBuiltinType 'PLC.NullList '[a] = PList a :--> PBool
+type instance PBuiltinForce 'PLC.MkCons = Nat1
 
-type instance PPBuiltinForce 'PLC.NullList = Nat1
+type instance PBuiltinType 'PLC.NullList '[a] = PList a :--> PBool
 
-type instance PPBuiltinType 'PLC.HeadList '[a] = PList a :--> a
+type instance PBuiltinForce 'PLC.NullList = Nat1
 
-type instance PPBuiltinForce 'PLC.HeadList = Nat1
+type instance PBuiltinType 'PLC.HeadList '[a] = PList a :--> a
 
-type instance PPBuiltinType 'PLC.TailList '[a] = PList a :--> PList a
+type instance PBuiltinForce 'PLC.HeadList = Nat1
 
-type instance PPBuiltinForce 'PLC.TailList = Nat1
+type instance PBuiltinType 'PLC.TailList '[a] = PList a :--> PList a
+
+type instance PBuiltinForce 'PLC.TailList = Nat1
 
 pmatchList :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). Term s (PList a) -> (PList a s -> Term s b) -> Term s b
 pmatchList list f =
-  plet (B.ppBuiltin @'PLC.NullList @'[a] £ list) $ \isEmpty ->
+  plet (B.pBuiltin @'PLC.NullList @'[a] £ list) $ \isEmpty ->
     pif
       (punsafeCoerce isEmpty)
       (f PNil)
       $ plet
-        (B.ppBuiltin @'PLC.HeadList @'[a] £ list)
+        (B.pBuiltin @'PLC.HeadList @'[a] £ list)
         ( \head ->
-            plet (B.ppBuiltin @'PLC.TailList @'[a] £ list) $ \tail ->
+            plet (B.pBuiltin @'PLC.TailList @'[a] £ list) $ \tail ->
               f $ PCons head tail
         )
 

@@ -17,17 +17,17 @@ import PlutusCore qualified as PLC
 -- | A builtin pair type.
 data PPair a b s = PPair (Term s a) (Term s b)
 
-type instance PPBuiltinType 'PLC.MkPairData '[a, b] = a :--> b :--> PPair a b
+type instance PBuiltinType 'PLC.MkPairData '[a, b] = a :--> b :--> PPair a b
 
-type instance PPBuiltinForce 'PLC.MkPairData = Nat2
+type instance PBuiltinForce 'PLC.MkPairData = Nat2
 
-type instance PPBuiltinType 'PLC.FstPair '[a, b] = PPair a b :--> a
+type instance PBuiltinType 'PLC.FstPair '[a, b] = PPair a b :--> a
 
-type instance PPBuiltinForce 'PLC.FstPair = Nat2
+type instance PBuiltinForce 'PLC.FstPair = Nat2
 
-type instance PPBuiltinType 'PLC.SndPair '[a, b] = PPair a b :--> b
+type instance PBuiltinType 'PLC.SndPair '[a, b] = PPair a b :--> b
 
-type instance PPBuiltinForce 'PLC.SndPair = Nat2
+type instance PBuiltinForce 'PLC.SndPair = Nat2
 
 -- | Match on a polymorphic pair of values
 matchPair ::
@@ -42,7 +42,7 @@ matchPair pair f =
       f $ PPair a b
 
 fstPair :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). Term s (PPair a b :--> a)
-fstPair = ppBuiltin @'PLC.FstPair @'[a, b]
+fstPair = pBuiltin @'PLC.FstPair @'[a, b]
 
 sndPair :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). Term s (PPair a b :--> b)
-sndPair = ppBuiltin @'PLC.SndPair @'[a, b]
+sndPair = pBuiltin @'PLC.SndPair @'[a, b]

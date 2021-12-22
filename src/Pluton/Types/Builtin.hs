@@ -4,11 +4,10 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Pluton.Types.Builtin
-  ( ppBuiltin,
-    ppBuiltin0,
-    PPBuiltin (..),
-    PPBuiltinType,
-    PPBuiltinForce,
+  ( pBuiltin,
+    PBuiltin (..),
+    PBuiltinType,
+    PBuiltinForce,
     (!#),
   )
 where
@@ -20,102 +19,105 @@ import Plutarch.Prelude
 import Plutarch.String
 import PlutusCore qualified as PLC
 
-class PPBuiltin (builtin :: PLC.DefaultFun) a where
-  ppBuiltinVal :: PLC.DefaultFun
+class PBuiltin (builtin :: PLC.DefaultFun) a where
+  pBuiltinVal :: PLC.DefaultFun
 
-type family PPBuiltinType (builtin :: PLC.DefaultFun) (as :: [k -> Type]) :: k -> Type
+type family PBuiltinType (builtin :: PLC.DefaultFun) (as :: [k -> Type]) :: k -> Type
 
-type family PPBuiltinForce (builtin :: PLC.DefaultFun) :: Nat
+-- TODO: Automatically calculate this from `as` of PBuiltinType.
+type family PBuiltinForce (builtin :: PLC.DefaultFun) :: Nat
 
-instance PPBuiltin 'PLC.MkCons a where
-  ppBuiltinVal = PLC.IData
-
-instance PPBuiltin 'PLC.NullList a where
-  ppBuiltinVal = PLC.NullList
-
-instance PPBuiltin 'PLC.HeadList a where
-  ppBuiltinVal = PLC.HeadList
-
-instance PPBuiltin 'PLC.TailList a where
-  ppBuiltinVal = PLC.TailList
-
-instance PPBuiltin 'PLC.MkPairData a where
-  ppBuiltinVal = PLC.MkPairData
-
-instance PPBuiltin 'PLC.FstPair a where
-  ppBuiltinVal = PLC.FstPair
-
-instance PPBuiltin 'PLC.SndPair a where
-  ppBuiltinVal = PLC.SndPair
-
-instance PPBuiltin 'PLC.ConstrData a where
-  ppBuiltinVal = PLC.ConstrData
-
-instance PPBuiltin 'PLC.MapData a where
-  ppBuiltinVal = PLC.MapData
-
-instance PPBuiltin 'PLC.ListData a where
-  ppBuiltinVal = PLC.ListData
-
-instance PPBuiltin 'PLC.IData a where
-  ppBuiltinVal = PLC.IData
-
-instance PPBuiltin 'PLC.BData a where
-  ppBuiltinVal = PLC.BData
-
-instance PPBuiltin 'PLC.ChooseData a where
-  ppBuiltinVal = PLC.ChooseData
-
-instance PPBuiltin 'PLC.EqualsData a where
-  ppBuiltinVal = PLC.EqualsData
-
-instance PPBuiltin 'PLC.UnConstrData a where
-  ppBuiltinVal = PLC.UnConstrData
-
-instance PPBuiltin 'PLC.UnMapData a where
-  ppBuiltinVal = PLC.UnMapData
-
-instance PPBuiltin 'PLC.UnListData a where
-  ppBuiltinVal = PLC.UnListData
-
-instance PPBuiltin 'PLC.UnIData a where
-  ppBuiltinVal = PLC.UnIData
-
-instance PPBuiltin 'PLC.UnBData a where
-  ppBuiltinVal = PLC.UnBData
-
-instance PPBuiltin 'PLC.Trace a where
-  ppBuiltinVal = PLC.Trace
-
-type instance PPBuiltinType 'PLC.Trace '[a] = PString :--> a :--> a
-
-type instance PPBuiltinForce 'PLC.Trace = Nat0
+-- | Type-safe version of `punsafeBuiltin` 
+--
+-- Use as: pBuiltin @'PLC.AddInteger @'[] 
+--
+-- The second type argument is the list of polymorphic vars in the builtin.
+pBuiltin ::
+  forall builtin a s.
+  (PBuiltin builtin a, SNatI (PBuiltinForce builtin)) =>
+  Term s (PBuiltinType builtin a)
+pBuiltin =
+  force . punsafeBuiltin $ pBuiltinVal @builtin @a
+  where
+    force :: Term s b -> Term s b
+    force =
+      let sn = snat :: SNat (PBuiltinForce builtin)
+       in forceN (snatToNat sn)
+    forceN :: forall s a. Nat -> Term s a -> Term s a
+    forceN Z = id
+    forceN (S n) = pforce . punsafeCoerce . forceN n
 
 pTrace :: forall a s. Text -> Term s a -> Term s a
-pTrace s f = ppBuiltin @('PLC.Trace) @'[a] £ pfromText s £ f
+pTrace s f = pBuiltin @('PLC.Trace) @'[a] £ pfromText s £ f
 
 (!#) :: forall k (s :: k) (a :: k -> Type). Text -> Term s a -> Term s a
 (!#) = pTrace
 
 infixl 8 !#
 
-ppBuiltin ::
-  forall builtin a s.
-  (PPBuiltin builtin a, SNatI (PPBuiltinForce builtin)) =>
-  Term s (PPBuiltinType builtin a)
-ppBuiltin =
-  force . punsafeBuiltin $ ppBuiltinVal @builtin @a
-  where
-    force :: Term s b -> Term s b
-    force =
-      let sn = snat :: SNat (PPBuiltinForce builtin)
-       in forceN (snatToNat sn)
-    forceN :: forall s a. Nat -> Term s a -> Term s a
-    forceN Z = id
-    forceN (S n) = pforce . punsafeCoerce . forceN n
+-- Instances
 
-ppBuiltin0 ::
-  forall builtin a s.
-  (a ~ '[], PPBuiltin builtin a, SNatI (PPBuiltinForce builtin)) =>
-  Term s (PPBuiltinType builtin a)
-ppBuiltin0 = ppBuiltin @builtin @'[]
+instance PBuiltin 'PLC.MkCons a where
+  pBuiltinVal = PLC.IData
+
+instance PBuiltin 'PLC.NullList a where
+  pBuiltinVal = PLC.NullList
+
+instance PBuiltin 'PLC.HeadList a where
+  pBuiltinVal = PLC.HeadList
+
+instance PBuiltin 'PLC.TailList a where
+  pBuiltinVal = PLC.TailList
+
+instance PBuiltin 'PLC.MkPairData a where
+  pBuiltinVal = PLC.MkPairData
+
+instance PBuiltin 'PLC.FstPair a where
+  pBuiltinVal = PLC.FstPair
+
+instance PBuiltin 'PLC.SndPair a where
+  pBuiltinVal = PLC.SndPair
+
+instance PBuiltin 'PLC.ConstrData a where
+  pBuiltinVal = PLC.ConstrData
+
+instance PBuiltin 'PLC.MapData a where
+  pBuiltinVal = PLC.MapData
+
+instance PBuiltin 'PLC.ListData a where
+  pBuiltinVal = PLC.ListData
+
+instance PBuiltin 'PLC.IData a where
+  pBuiltinVal = PLC.IData
+
+instance PBuiltin 'PLC.BData a where
+  pBuiltinVal = PLC.BData
+
+instance PBuiltin 'PLC.ChooseData a where
+  pBuiltinVal = PLC.ChooseData
+
+instance PBuiltin 'PLC.EqualsData a where
+  pBuiltinVal = PLC.EqualsData
+
+instance PBuiltin 'PLC.UnConstrData a where
+  pBuiltinVal = PLC.UnConstrData
+
+instance PBuiltin 'PLC.UnMapData a where
+  pBuiltinVal = PLC.UnMapData
+
+instance PBuiltin 'PLC.UnListData a where
+  pBuiltinVal = PLC.UnListData
+
+instance PBuiltin 'PLC.UnIData a where
+  pBuiltinVal = PLC.UnIData
+
+instance PBuiltin 'PLC.UnBData a where
+  pBuiltinVal = PLC.UnBData
+
+instance PBuiltin 'PLC.Trace a where
+  pBuiltinVal = PLC.Trace
+
+type instance PBuiltinType 'PLC.Trace '[a] = PString :--> a :--> a
+
+type instance PBuiltinForce 'PLC.Trace = Nat0
+
