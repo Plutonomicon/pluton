@@ -11,18 +11,15 @@ module Pluton.Sample.Validator.Plutarch (plutarchValidator) where
 
 import Ledger.Scripts (Validator (..))
 import Plutarch
-import Plutarch.Bool
-import Plutarch.ByteString
-import Plutarch.Integer
-import Plutarch.Unit
-import Pluton.Types.Builtin (
-  PList,
-  PPair (..),
-  (!£),
- )
-import Pluton.Types.Builtin.Data ()
-import Pluton.Types.Builtin.Data.Type
+import Plutarch.Bool (PBool, pif)
+import Plutarch.ByteString (PByteString)
+import Plutarch.Integer (PInteger)
+import Plutarch.Unit (PUnit (..))
+import Pluton.Types.Builtin ((!#))
+import Pluton.Types.Builtin.Data (PData (..))
+import Pluton.Types.Builtin.List (PList)
 import Pluton.Types.Builtin.List qualified as BL
+import Pluton.Types.Builtin.Pair (PPair (..))
 import Pluton.Types.Builtin.Pair qualified as BP
 
 plutarchValidator :: Validator
@@ -40,7 +37,7 @@ validator =
       pmatch' (scriptContextTxInfo ctx) $ \(txInfo :: TxInfo s) ->
         plet (txInfoSignatories txInfo) $ \signatories ->
           plet (BL.contains £ signatories £ punsafeCoerce datum) $ \(isBeneficiary :: Term s PBool) ->
-            pif isBeneficiary (pcon PUnit) $ "plu:not-beneficiary" !£ perror
+            pif isBeneficiary (pcon PUnit) $ "plu:not-beneficiary" !# perror
 
 data ScriptContext s = ScriptContext
   { scriptContextTxInfo :: Term s TxInfo

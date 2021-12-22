@@ -1,47 +1,112 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
-module Pluton.Types.Builtin (
-  pTrace,
-  (#£),
-  (!£),
-  PBuiltin (..),
-  PList (..),
-  PPair (..),
-) where
+module Pluton.Types.Builtin
+  ( ppBuiltin,
+    ppBuiltin0,
+    PPBuiltin (..),
+    PPBuiltinType,
+    PPBuiltinForce,
+    (!#),
+  )
+where
 
-import Data.Proxy
 import Data.Text (Text)
 import Data.Type.Nat
 import Plutarch
-import Plutarch.Bool
-import Plutarch.ByteString (PByteString)
-import Plutarch.Integer (PInteger)
 import Plutarch.Prelude
 import Plutarch.String
-import Pluton.Types.Builtin.Data.Type
-import Pluton.Types.Builtin.List.Type
-import Pluton.Types.Builtin.Pair.Type
 import PlutusCore qualified as PLC
 
-class PPBuiltin (builtin :: PLC.DefaultFun) where
-  type PPBuiltinType builtin :: k -> Type
-  type PPBuiltinForce builtin :: Nat
+class PPBuiltin (builtin :: PLC.DefaultFun) a where
   ppBuiltinVal :: PLC.DefaultFun
 
-instance PPBuiltin 'PLC.IData where
-  type PPBuiltinType 'PLC.IData = PInteger :--> PData
-  type PPBuiltinForce 'PLC.IData = 'Z
+type family PPBuiltinType (builtin :: PLC.DefaultFun) (as :: [k -> Type]) :: k -> Type
+
+type family PPBuiltinForce (builtin :: PLC.DefaultFun) :: Nat
+
+instance PPBuiltin 'PLC.MkCons a where
   ppBuiltinVal = PLC.IData
 
+instance PPBuiltin 'PLC.NullList a where
+  ppBuiltinVal = PLC.NullList
+
+instance PPBuiltin 'PLC.HeadList a where
+  ppBuiltinVal = PLC.HeadList
+
+instance PPBuiltin 'PLC.TailList a where
+  ppBuiltinVal = PLC.TailList
+
+instance PPBuiltin 'PLC.MkPairData a where
+  ppBuiltinVal = PLC.MkPairData
+
+instance PPBuiltin 'PLC.FstPair a where
+  ppBuiltinVal = PLC.FstPair
+
+instance PPBuiltin 'PLC.SndPair a where
+  ppBuiltinVal = PLC.SndPair
+
+instance PPBuiltin 'PLC.ConstrData a where
+  ppBuiltinVal = PLC.ConstrData
+
+instance PPBuiltin 'PLC.MapData a where
+  ppBuiltinVal = PLC.MapData
+
+instance PPBuiltin 'PLC.ListData a where
+  ppBuiltinVal = PLC.ListData
+
+instance PPBuiltin 'PLC.IData a where
+  ppBuiltinVal = PLC.IData
+
+instance PPBuiltin 'PLC.BData a where
+  ppBuiltinVal = PLC.BData
+
+instance PPBuiltin 'PLC.ChooseData a where
+  ppBuiltinVal = PLC.ChooseData
+
+instance PPBuiltin 'PLC.EqualsData a where
+  ppBuiltinVal = PLC.EqualsData
+
+instance PPBuiltin 'PLC.UnConstrData a where
+  ppBuiltinVal = PLC.UnConstrData
+
+instance PPBuiltin 'PLC.UnMapData a where
+  ppBuiltinVal = PLC.UnMapData
+
+instance PPBuiltin 'PLC.UnListData a where
+  ppBuiltinVal = PLC.UnListData
+
+instance PPBuiltin 'PLC.UnIData a where
+  ppBuiltinVal = PLC.UnIData
+
+instance PPBuiltin 'PLC.UnBData a where
+  ppBuiltinVal = PLC.UnBData
+
+instance PPBuiltin 'PLC.Trace a where
+  ppBuiltinVal = PLC.Trace
+
+type instance PPBuiltinType 'PLC.Trace '[a] = PString :--> a :--> a
+
+type instance PPBuiltinForce 'PLC.Trace = Nat0
+
+pTrace :: forall a s. Text -> Term s a -> Term s a
+pTrace s f = ppBuiltin @('PLC.Trace) @'[a] £ pfromText s £ f
+
+(!#) :: forall k (s :: k) (a :: k -> Type). Text -> Term s a -> Term s a
+(!#) = pTrace
+
+infixl 8 !#
+
 ppBuiltin ::
-  forall builtin s.
-  (PPBuiltin builtin, SNatI (PPBuiltinForce builtin)) =>
-  Term s (PPBuiltinType builtin)
+  forall builtin a s.
+  (PPBuiltin builtin a, SNatI (PPBuiltinForce builtin)) =>
+  Term s (PPBuiltinType builtin a)
 ppBuiltin =
-  force . punsafeBuiltin $ ppBuiltinVal @builtin
+  force . punsafeBuiltin $ ppBuiltinVal @builtin @a
   where
-    force :: Term s a -> Term s a
+    force :: Term s b -> Term s b
     force =
       let sn = snat :: SNat (PPBuiltinForce builtin)
        in forceN (snatToNat sn)
@@ -49,119 +114,8 @@ ppBuiltin =
     forceN Z = id
     forceN (S n) = pforce . punsafeCoerce . forceN n
 
-ppIData :: forall k (s :: k). Term s (PInteger :--> PData)
-ppIData = ppBuiltin @( 'PLC.IData) -- fourmolu crashes without these paratheses
-
-{- | Type spec for PLC's untyped builtin functions
-
- Note: `forces` determines the repeated application of `FORCE` when evaluating
- a polymorphic builtin function.
-
- Example: (UnConstrData #£ someData)
--}
-data PBuiltin (forces :: Nat) (args :: [k -> Type]) (res :: k -> Type) where
-  UnConstrData :: PBuiltin Nat0 '[PData] (PPair PInteger (PList PData))
-  UnListData :: PBuiltin Nat0 '[PData] (PList PData)
-  UnMapData :: PBuiltin Nat0 '[PData] (PList (PPair PData PData))
-  ChooseData :: forall c' c. (c ~ PDelayed c') => PBuiltin Nat1 '[PData, c, c, c, c, c] c
-  ConstrData :: PBuiltin Nat0 '[PPair PInteger (PList PData)] PData
-  MapData :: PBuiltin Nat0 '[PList (PPair PData PData)] PData
-  ListData :: PBuiltin Nat0 '[PList PData] PData
-  MkPairData :: PBuiltin Nat0 '[a, b] (PPair a b)
-  FstPair :: PBuiltin Nat2 '[PPair a b] a
-  SndPair :: PBuiltin Nat2 '[PPair a b] b
-  MkCons :: PBuiltin Nat1 '[a, PList a] (PList a)
-  NullList :: PBuiltin Nat1 '[a] PBool
-  HeadList :: PBuiltin Nat1 '[PList a] a
-  TailList :: PBuiltin Nat1 '[PList a] (PList a)
-  EqualsData :: PBuiltin Nat0 '[PData, PData] PBool
-  IData :: PBuiltin Nat0 '[PInteger] PData
-  BData :: PBuiltin Nat0 '[PByteString] PData
-  UnIData :: PBuiltin Nat0 '[PData] PInteger
-  UnBData :: PBuiltin Nat0 '[PData] PByteString
-  Trace :: PBuiltin Nat1 '[PString, a] a
-
--- Haskell function type for a Plutus builtin.
-type family PBuiltinType (args :: [k -> Type]) (res :: k -> Type) where
-  PBuiltinType '[] res = res
-  PBuiltinType (a ': as) res = a :--> PBuiltinType as res
-
-pBuiltinTerm ::
-  forall args res forces s.
-  PBuiltin forces args res ->
-  Term s (PBuiltinType args res)
-pBuiltinTerm b =
-  phoistAcyclic $ case b of
-    UnConstrData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.UnConstrData
-    UnListData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.UnListData
-    UnMapData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.UnMapData
-    ChooseData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.ChooseData
-    ConstrData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.ConstrData
-    MapData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.MapData
-    ListData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.ListData
-    MkPairData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.MkPairData
-    FstPair ->
-      force @forces Proxy . punsafeBuiltin $ PLC.FstPair
-    SndPair ->
-      force @forces Proxy . punsafeBuiltin $ PLC.SndPair
-    MkCons ->
-      force @forces Proxy . punsafeBuiltin $ PLC.MkCons
-    NullList ->
-      force @forces Proxy . punsafeBuiltin $ PLC.NullList
-    HeadList ->
-      force @forces Proxy . punsafeBuiltin $ PLC.HeadList
-    TailList ->
-      force @forces Proxy . punsafeBuiltin $ PLC.TailList
-    EqualsData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.EqualsData
-    IData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.IData
-    BData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.BData
-    UnIData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.UnIData
-    UnBData ->
-      force @forces Proxy . punsafeBuiltin $ PLC.UnBData
-    Trace ->
-      force @forces Proxy . punsafeBuiltin $ PLC.Trace
-  where
-    force :: forall forces s a. SNatI forces => Proxy (forces :: Nat) -> Term s a -> Term s a
-    force Proxy =
-      let sn = snat :: SNat forces
-       in forceN (snatToNat sn)
-    forceN :: forall s a. Nat -> Term s a -> Term s a
-    forceN Z = id
-    forceN (S n) = pforce . punsafeCoerce . forceN n
-
-(#£) ::
-  forall
-    k
-    (args :: [k -> Type])
-    (res :: k -> Type)
-    (a :: k -> Type)
-    (b :: k -> Type)
-    (forces :: Nat)
-    (s :: k).
-  (PBuiltinType args res ~ (a :--> b)) =>
-  PBuiltin forces args res ->
-  Term s a ->
-  Term s b
-(#£) b = (pBuiltinTerm b £)
-infixl 9 #£
-
--- Handy builtin aliases
-
-pTrace :: Text -> Term s a -> Term s a
-pTrace s f = Trace #£ pfromText s £ f
-
-(!£) :: forall k (s :: k) (a :: k -> Type). Text -> Term s a -> Term s a
-(!£) = pTrace
-infixl 8 !£
+ppBuiltin0 ::
+  forall builtin a s.
+  (a ~ '[], PPBuiltin builtin a, SNatI (PPBuiltinForce builtin)) =>
+  Term s (PPBuiltinType builtin a)
+ppBuiltin0 = ppBuiltin @builtin @'[]

@@ -1,30 +1,33 @@
-{-# OPTIONS_GHC -Wno-orphans #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
-module Pluton.Types.Builtin.Pair (
-  PPair (..),
-  matchPair,
-  fstPair,
-  sndPair,
-  mkPairData,
-) where
+module Pluton.Types.Builtin.Pair
+  ( PPair (..),
+    matchPair,
+    fstPair,
+    sndPair,
+  )
+where
 
+import Data.Type.Nat
 import Plutarch
 import Plutarch.Prelude
-import Pluton.Types.Builtin (
-  PBuiltin (FstPair, MkPairData, SndPair),
-  PPair (..),
-  (#£),
- )
-import Pluton.Types.Builtin.Data.Type (PData)
+import Pluton.Types.Builtin
+import PlutusCore qualified as PLC
 
--- This instance is for Data only, because `MkPairData` is the only way to
--- construct a pair. If you want to use a polymorphic pair, use `matchPair`
--- directly.
-instance (a ~ PData, b ~ PData) => PlutusType (PPair a b) where
-  type PInner (PPair a b) _ = PPair a b
-  pcon' (PPair a b) =
-    MkPairData #£ a £ b -- There is no MkPair
-  pmatch' = matchPair
+-- | A builtin pair type.
+data PPair a b s = PPair (Term s a) (Term s b)
+
+type instance PPBuiltinType 'PLC.MkPairData '[a, b] = a :--> b :--> PPair a b
+
+type instance PPBuiltinForce 'PLC.MkPairData = Nat2
+
+type instance PPBuiltinType 'PLC.FstPair '[a, b] = PPair a b :--> a
+
+type instance PPBuiltinForce 'PLC.FstPair = Nat2
+
+type instance PPBuiltinType 'PLC.SndPair '[a, b] = PPair a b :--> b
+
+type instance PPBuiltinForce 'PLC.SndPair = Nat2
 
 -- | Match on a polymorphic pair of values
 matchPair ::
@@ -34,21 +37,12 @@ matchPair ::
   Term s c
 matchPair pair f =
   -- TODO: use delay/force to avoid evaluating `pair` twice?
-  plet (FstPair #£ pair) $ \a ->
-    plet (SndPair #£ pair) $ \b ->
+  plet (fstPair £ pair) $ \a ->
+    plet (sndPair £ pair) $ \b ->
       f $ PPair a b
 
-fstPair :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). Term s (PPair a b) -> Term s a
-fstPair = (FstPair #£)
+fstPair :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). Term s (PPair a b :--> a)
+fstPair = ppBuiltin @'PLC.FstPair @'[a, b]
 
-sndPair :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). Term s (PPair a b) -> Term s b
-sndPair = (SndPair #£)
-
--- | Create a `Pair` of `Data` values.
-mkPairData ::
-  forall k (s :: k) (a :: k -> Type) (b :: k -> Type).
-  (a ~ PData, b ~ PData) =>
-  Term s a ->
-  Term s b ->
-  Term s (PPair a b)
-mkPairData x y = pcon' $ PPair x y
+sndPair :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). Term s (PPair a b :--> b)
+sndPair = ppBuiltin @'PLC.SndPair @'[a, b]
