@@ -21,6 +21,35 @@ import Pluton.Types.Builtin.List.Type
 import Pluton.Types.Builtin.Pair.Type
 import PlutusCore qualified as PLC
 
+class PPBuiltin (builtin :: PLC.DefaultFun) where
+  type PPBuiltinType builtin :: k -> Type
+  type PPBuiltinForce builtin :: Nat
+  ppBuiltinVal :: Proxy builtin -> PLC.DefaultFun
+
+instance PPBuiltin 'PLC.IData where
+  type PPBuiltinType 'PLC.IData = PInteger :--> PData
+  type PPBuiltinForce 'PLC.IData = 'Z
+  ppBuiltinVal Proxy = PLC.IData
+
+ppBuiltin ::
+  forall builtin forces s.
+  (PPBuiltin builtin, forces ~ PPBuiltinForce builtin, SNatI forces) =>
+  Proxy builtin ->
+  Term s (PPBuiltinType builtin)
+ppBuiltin Proxy =
+  force @forces Proxy . punsafeBuiltin $ ppBuiltinVal @builtin Proxy
+  where
+    force :: forall forces s a. SNatI forces => Proxy (forces :: Nat) -> Term s a -> Term s a
+    force Proxy =
+      let sn = snat :: SNat forces
+       in forceN (snatToNat sn)
+    forceN :: forall s a. Nat -> Term s a -> Term s a
+    forceN Z = id
+    forceN (S n) = pforce . punsafeCoerce . forceN n
+
+ppIData :: forall k (s :: k). Term s (PInteger :--> PData)
+ppIData = ppBuiltin @'PLC.IData Proxy
+
 {- | Type spec for PLC's untyped builtin functions
 
  Note: `forces` determines the repeated application of `FORCE` when evaluating
