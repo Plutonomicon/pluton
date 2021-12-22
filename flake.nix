@@ -39,6 +39,10 @@
 
             nativeBuildInputs = [
               pkgs.nixpkgs-fmt
+              # pkgs.ormolu
+              # pkgs.haskellPackages.cabal-fmt
+              # pkgs.hlint
+              # pkgs.ghcid
             ];
 
             tools = {

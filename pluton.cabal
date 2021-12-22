@@ -41,11 +41,8 @@ executable pluton
     Pluton.Sample.Validator.Pluto
     Pluton.Types.Builtin
     Pluton.Types.Builtin.Data
-    Pluton.Types.Builtin.Data.Type
     Pluton.Types.Builtin.List
-    Pluton.Types.Builtin.List.Type
     Pluton.Types.Builtin.Pair
-    Pluton.Types.Builtin.Pair.Type
 
   build-depends:
     , base
