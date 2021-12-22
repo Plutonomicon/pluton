@@ -25,7 +25,6 @@ where
 import Data.ByteString qualified as BS
 import Data.Proxy
 import Data.Text (Text)
-import Data.Type.Nat
 import Plutarch
 import Plutarch.Bool
 import Plutarch.ByteString
@@ -83,19 +82,11 @@ instance ListElemUni (a :: k -> Type) => PlutusType (PList a) where
 
 type instance PBuiltinType 'PLC.MkCons '[a] = a :--> PList a :--> PList a
 
-type instance PBuiltinForce 'PLC.MkCons = Nat1
-
 type instance PBuiltinType 'PLC.NullList '[a] = PList a :--> PBool
-
-type instance PBuiltinForce 'PLC.NullList = Nat1
 
 type instance PBuiltinType 'PLC.HeadList '[a] = PList a :--> a
 
-type instance PBuiltinForce 'PLC.HeadList = Nat1
-
 type instance PBuiltinType 'PLC.TailList '[a] = PList a :--> PList a
-
-type instance PBuiltinForce 'PLC.TailList = Nat1
 
 pmatchList :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). Term s (PList a) -> (PList a s -> Term s b) -> Term s b
 pmatchList list f =

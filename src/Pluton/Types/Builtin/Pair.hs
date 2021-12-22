@@ -8,7 +8,6 @@ module Pluton.Types.Builtin.Pair
   )
 where
 
-import Data.Type.Nat
 import Plutarch
 import Plutarch.Prelude
 import Pluton.Types.Builtin
@@ -19,15 +18,9 @@ data PPair a b s = PPair (Term s a) (Term s b)
 
 type instance PBuiltinType 'PLC.MkPairData '[a, b] = a :--> b :--> PPair a b
 
-type instance PBuiltinForce 'PLC.MkPairData = Nat2
-
 type instance PBuiltinType 'PLC.FstPair '[a, b] = PPair a b :--> a
 
-type instance PBuiltinForce 'PLC.FstPair = Nat2
-
 type instance PBuiltinType 'PLC.SndPair '[a, b] = PPair a b :--> b
-
-type instance PBuiltinForce 'PLC.SndPair = Nat2
 
 -- | Match on a polymorphic pair of values
 matchPair ::

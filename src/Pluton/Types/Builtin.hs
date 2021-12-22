@@ -3,11 +3,15 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
+-- | Type-safe builtins.
+--
+-- To define the type of a particular builtin, write a type instance for
+-- `PBuiltinType`. This enables `pBuiltin` to be used on that PLC builtin:
+-- 
+-- @(pBuiltin @'PLC.UnIData @'[] £ someData)@
 module Pluton.Types.Builtin
   ( pBuiltin,
-    PBuiltin (..),
     PBuiltinType,
-    PBuiltinForce,
     (!#),
   )
 where
@@ -19,13 +23,14 @@ import Plutarch.Prelude
 import Plutarch.String
 import PlutusCore qualified as PLC
 
-class PBuiltin (builtin :: PLC.DefaultFun) a where
+class PBuiltin (builtin :: PLC.DefaultFun) as where
   pBuiltinVal :: PLC.DefaultFun
 
 type family PBuiltinType (builtin :: PLC.DefaultFun) (as :: [k -> Type]) :: k -> Type
 
--- TODO: Automatically calculate this from `as` of PBuiltinType.
-type family PBuiltinForce (builtin :: PLC.DefaultFun) :: Nat
+type family Length (l :: [k]) :: Nat
+type instance Length '[] = 'Z
+type instance Length (x : xs) = 'S (Length xs)
 
 -- | Type-safe version of `punsafeBuiltin` 
 --
@@ -33,15 +38,17 @@ type family PBuiltinForce (builtin :: PLC.DefaultFun) :: Nat
 --
 -- The second type argument is the list of polymorphic vars in the builtin.
 pBuiltin ::
-  forall builtin a s.
-  (PBuiltin builtin a, SNatI (PBuiltinForce builtin)) =>
-  Term s (PBuiltinType builtin a)
+  forall builtin as s.
+  (PBuiltin builtin as, SNatI (Length as)) =>
+  Term s (PBuiltinType builtin as)
 pBuiltin =
-  force . punsafeBuiltin $ pBuiltinVal @builtin @a
+  force . punsafeBuiltin $ pBuiltinVal @builtin @as
   where
+    -- The number of forces to apply is equivalent to the arity of polymorphic
+    -- vars `as`.
     force :: Term s b -> Term s b
     force =
-      let sn = snat :: SNat (PBuiltinForce builtin)
+      let sn = snat :: SNat (Length as)
        in forceN (snatToNat sn)
     forceN :: forall s a. Nat -> Term s a -> Term s a
     forceN Z = id
@@ -119,5 +126,4 @@ instance PBuiltin 'PLC.Trace a where
 
 type instance PBuiltinType 'PLC.Trace '[a] = PString :--> a :--> a
 
-type instance PBuiltinForce 'PLC.Trace = Nat0
 

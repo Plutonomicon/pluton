@@ -10,7 +10,6 @@ module Pluton.Types.Builtin.Data
 where
 
 import Data.Data (Proxy (Proxy))
-import Data.Type.Nat
 import Plutarch
 import Plutarch.Bool (PBool, PEq (..))
 import Plutarch.ByteString (PByteString)
@@ -32,23 +31,13 @@ data PData s
 
 type instance PBuiltinType 'PLC.ConstrData '[] = PPair PInteger (PList PData) :--> PData
 
-type instance PBuiltinForce 'PLC.ConstrData = Nat0
-
 type instance PBuiltinType 'PLC.MapData '[] = PList (PPair PData PData) :--> PData
-
-type instance PBuiltinForce 'PLC.MapData = Nat0
 
 type instance PBuiltinType 'PLC.ListData '[] = PList PData :--> PData
 
-type instance PBuiltinForce 'PLC.ListData = Nat0
-
 type instance PBuiltinType 'PLC.IData '[] = PInteger :--> PData
 
-type instance PBuiltinForce 'PLC.IData = Nat0
-
 type instance PBuiltinType 'PLC.BData '[] = PByteString :--> PData
-
-type instance PBuiltinForce 'PLC.BData = Nat0
 
 type instance
   PBuiltinType 'PLC.ChooseData '[PDelayed c] =
@@ -60,31 +49,17 @@ type instance
       :--> PDelayed c
       :--> PDelayed c
 
-type instance PBuiltinForce 'PLC.ChooseData = Nat1
-
 type instance PBuiltinType 'PLC.UnConstrData '[] = PData :--> PPair PInteger (PList PData)
-
-type instance PBuiltinForce 'PLC.UnConstrData = Nat0
 
 type instance PBuiltinType 'PLC.UnMapData '[] = PData :--> PList (PPair PData PData)
 
-type instance PBuiltinForce 'PLC.UnMapData = Nat0
-
 type instance PBuiltinType 'PLC.UnListData '[] = PData :--> PList PData
-
-type instance PBuiltinForce 'PLC.UnListData = Nat0
 
 type instance PBuiltinType 'PLC.UnIData '[] = PData :--> PInteger
 
-type instance PBuiltinForce 'PLC.UnIData = Nat0
-
 type instance PBuiltinType 'PLC.UnBData '[] = PData :--> PByteString
 
-type instance PBuiltinForce 'PLC.UnBData = Nat0
-
 type instance PBuiltinType 'PLC.EqualsData '[] = PData :--> PData :--> PBool
-
-type instance PBuiltinForce 'PLC.EqualsData = Nat0
 
 instance PlutusType PData where
   type PInner PData _ = PData
