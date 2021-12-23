@@ -18,7 +18,6 @@ where
 import Data.Type.Nat
 import Plutarch
 import Plutarch.Prelude
-import Plutarch.String
 import PlutusCore qualified as PLC
 
 -- This class exists only because Haskell has no way to get the value given the
@@ -57,6 +56,7 @@ pBuiltinFun =
     forceN (S n) = pforce . punsafeCoerce . forceN n
 
 -- Instances
+-- TODO: Generate this in TH to prevent error-prone changes.
 
 instance PBuiltinFun 'PLC.MkCons a where
   pBuiltinFunVal = PLC.MkCons
@@ -117,5 +117,3 @@ instance PBuiltinFun 'PLC.UnBData a where
 
 instance PBuiltinFun 'PLC.Trace a where
   pBuiltinFunVal = PLC.Trace
-
-type instance PBuiltinFunType 'PLC.Trace '[a] = PString :--> a :--> a
