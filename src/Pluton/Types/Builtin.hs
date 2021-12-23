@@ -67,7 +67,7 @@ infixl 8 !#
 -- Instances
 
 instance PBuiltin 'PLC.MkCons a where
-  pBuiltinVal = PLC.IData
+  pBuiltinVal = PLC.MkCons
 
 instance PBuiltin 'PLC.NullList a where
   pBuiltinVal = PLC.NullList
