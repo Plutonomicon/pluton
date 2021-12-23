@@ -47,3 +47,11 @@ cabal bench
 ```
 
 This will write the benchmark report to `report.html`.
+
+### Benchmarking a commit
+
+To run benchmarks on a particular commit,
+
+```
+nix run github:Plutonomicon/pluton/<COMMIT-GOES-HERE>#benchmark
+```
