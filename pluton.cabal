@@ -140,6 +140,7 @@ test-suite spec
     , tasty-hedgehog
     , tasty-quickcheck
     , text
+    , with-utf8
 
 benchmark perf
   import:         common 

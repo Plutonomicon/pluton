@@ -128,10 +128,15 @@
             type = "app";
             program = "${flake.packages."pluton:bench:perf"}/bin/perf";
           };
+          test = {
+            type = "app";
+            program = "${flake.packages."pluton:test:spec"}/bin/spec";
+          };
           # Add more apps here ...
         };
         checks = {
-          benchmark = pkgs.runCommand "benchmark" {} "${self.apps.${system}.benchmark.program} | tee $out";
+          benchmark = pkgs.runCommand "benchmark" { } "${self.apps.${system}.benchmark.program} | tee $out";
+          test = pkgs.runCommand "test" { } "${self.apps.${system}.test.program}";
         };
         ciNix = inputs.flake-compat-ci.lib.recurseIntoFlakeWith {
           flake = self;
