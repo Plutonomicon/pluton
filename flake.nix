@@ -124,9 +124,15 @@
       in
       flake // {
         apps = {
+          benchmark = {
+            type = "app";
+            program = "${flake.packages."pluton:bench:perf"}/bin/perf";
+          };
           # Add more apps here ...
         };
-        checks = { };
+        checks = {
+          benchmark = pkgs.runCommand "benchmark" {} "${self.apps.${system}.benchmark.program} | tee $out";
+        };
         ciNix = inputs.flake-compat-ci.lib.recurseIntoFlakeWith {
           flake = self;
           systems = [ "x86_64-linux" ];
