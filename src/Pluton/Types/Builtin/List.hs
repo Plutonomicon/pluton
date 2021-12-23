@@ -48,27 +48,27 @@ instance PUni (a :: k -> Type) => PlutusType (PList a) where
               PLC.knownUniOf $ Proxy @(PUniType a)
           )
           []
-  pcon' (PCons x xs) = B.pBuiltin @'PLC.MkCons @'[a] # x # xs
+  pcon' (PCons x xs) = B.pBuiltinFun @'PLC.MkCons @'[a] # x # xs
   pmatch' = pmatchList
 
-type instance PBuiltinType 'PLC.MkCons '[a] = a :--> PList a :--> PList a
+type instance PBuiltinFunType 'PLC.MkCons '[a] = a :--> PList a :--> PList a
 
-type instance PBuiltinType 'PLC.NullList '[a] = PList a :--> PBool
+type instance PBuiltinFunType 'PLC.NullList '[a] = PList a :--> PBool
 
-type instance PBuiltinType 'PLC.HeadList '[a] = PList a :--> a
+type instance PBuiltinFunType 'PLC.HeadList '[a] = PList a :--> a
 
-type instance PBuiltinType 'PLC.TailList '[a] = PList a :--> PList a
+type instance PBuiltinFunType 'PLC.TailList '[a] = PList a :--> PList a
 
 pmatchList :: forall k (s :: k) (a :: k -> Type) (b :: k -> Type). Term s (PList a) -> (PList a s -> Term s b) -> Term s b
 pmatchList list f =
-  plet (B.pBuiltin @'PLC.NullList @'[a] # list) $ \isEmpty ->
+  plet (B.pBuiltinFun @'PLC.NullList @'[a] # list) $ \isEmpty ->
     pif
       (punsafeCoerce isEmpty)
       (f PNil)
       $ plet
-        (B.pBuiltin @'PLC.HeadList @'[a] # list)
+        (B.pBuiltinFun @'PLC.HeadList @'[a] # list)
         ( \head ->
-            plet (B.pBuiltin @'PLC.TailList @'[a] # list) $ \tail ->
+            plet (B.pBuiltinFun @'PLC.TailList @'[a] # list) $ \tail ->
               f $ PCons head tail
         )
 
