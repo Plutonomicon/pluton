@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -xe
+
+ghcid -c 'cabal repl spec' -T :main

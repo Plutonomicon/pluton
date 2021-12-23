@@ -110,8 +110,33 @@ executable pluton
     , base
     , plutarch
     , pluton
+    , pluton-example-contract
     , plutus-contract
     , plutus-core
+
+test-suite spec
+  import:         common 
+  type:           exitcode-stdio-1.0
+  main-is:        Spec.hs
+  hs-source-dirs: test
+  other-modules:  Pluton.Types.Builtin.ListSpec
+  build-depends:
+    , base
+    , bytestring
+    , containers
+    , either
+    , exceptions
+    , filepath
+    , hedgehog
+    , lens
+    , mtl
+    , pluton
+    , plutus-core
+    , QuickCheck
+    , tasty
+    , tasty-hedgehog
+    , tasty-quickcheck
+    , text
 
 benchmark perf
   import:         common 
