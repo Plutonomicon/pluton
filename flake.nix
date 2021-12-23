@@ -6,10 +6,14 @@
     nixpkgs.follows = "haskell-nix/nixpkgs-unstable";
     plutus.url = "github:input-output-hk/plutus"; # used for libsodium-vrf (TODO: Is this really needed?)
     flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = inputs@{ self, nixpkgs, haskell-nix, flake-utils, plutus, ... }:
+  outputs = inputs@{ self, nixpkgs, haskell-nix, flake-utils, plutus, flake-compat, flake-compat-ci, ... }:
     flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
       let
         overlays = [
@@ -130,7 +134,9 @@
           };
           # Add more apps here ...
         };
-        checks = {
+        # We need to append the checks that come from haskell.nix to our own,
+        # hence the need for flake.checks // {}.
+        checks = flake.checks // {
           benchmark = pkgs.runCommand "benchmark" {} "${self.apps.${system}.benchmark.program} | tee $out";
         };
         ciNix = inputs.flake-compat-ci.lib.recurseIntoFlakeWith {
