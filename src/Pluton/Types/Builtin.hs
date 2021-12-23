@@ -23,6 +23,8 @@ import Plutarch.Prelude
 import Plutarch.String
 import PlutusCore qualified as PLC
 
+-- This class exists only because Haskell has no way to get the value given the
+-- promoted data kind type.
 class PBuiltin (builtin :: PLC.DefaultFun) as where
   pBuiltinVal :: PLC.DefaultFun
 
@@ -57,7 +59,7 @@ pBuiltin =
     forceN (S n) = pforce . punsafeCoerce . forceN n
 
 pTrace :: forall a s. Text -> Term s a -> Term s a
-pTrace s f = pBuiltin @('PLC.Trace) @'[a] # pfromText s # f
+pTrace s f = pBuiltin @'PLC.Trace @'[a] # pfromText s # f
 
 (!#) :: forall k (s :: k) (a :: k -> Type). Text -> Term s a -> Term s a
 (!#) = pTrace

@@ -37,6 +37,7 @@ library
     Pluton
     Pluton.Evaluate
     Pluton.Types.Builtin
+    Pluton.Types.Builtin.Uni
     Pluton.Types.Builtin.Data
     Pluton.Types.Builtin.List
     Pluton.Types.Builtin.Pair

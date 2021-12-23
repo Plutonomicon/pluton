@@ -10,7 +10,6 @@ module Pluton.Types.Builtin.Data
   )
 where
 
-import Data.Data (Proxy (Proxy))
 import Plutarch
 import Plutarch.Bool (PBool, PEq (..))
 import Plutarch.ByteString (PByteString)
@@ -19,6 +18,7 @@ import Pluton.Types.Builtin
 import Pluton.Types.Builtin qualified as B
 import Pluton.Types.Builtin.List
 import Pluton.Types.Builtin.Pair
+import Pluton.Types.Builtin.Uni
 import PlutusCore.Data qualified as PLC
 import PlutusCore.Default qualified as PLC
 
@@ -84,9 +84,8 @@ instance PlutusType PData where
         # pdelay (f (PDataInteger (B.pBuiltin @'PLC.UnIData @'[] # x)))
         # pdelay (f (PDataByteString (B.pBuiltin @'PLC.UnBData @'[] # x)))
 
-instance ListElemUni PData where
-  type ListElemType PData = PLC.Data
-  listElemUni Proxy = PLC.DefaultUniData
+instance PUni PData where
+  type PUniType PData = PLC.Data
 
 instance PEq PData where
   a #== b = B.pBuiltin @'PLC.EqualsData @'[] # a # b
