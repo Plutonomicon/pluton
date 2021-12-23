@@ -36,11 +36,6 @@ library
   exposed-modules:
     Pluton
     Pluton.Evaluate
-    Pluton.Sample.Offchain
-    Pluton.Sample.Test
-    Pluton.Sample.Validator.Haskell
-    Pluton.Sample.Validator.Plutarch
-    Pluton.Sample.Validator.Pluto
     Pluton.Types.Builtin
     Pluton.Types.Builtin.Data
     Pluton.Types.Builtin.List
@@ -58,6 +53,42 @@ library
     , mtl
     , plutarch           >=1.0
     , pluto
+    , plutus-contract
+    , plutus-core
+    , plutus-ledger
+    , plutus-ledger-api
+    , plutus-tx
+    , plutus-tx-plugin
+    , QuickCheck
+    , shower
+    , tasty
+    , tasty-hedgehog
+    , tasty-quickcheck
+    , text
+
+library pluton-example-contract
+  import:          common
+  hs-source-dirs:  examples/contract
+  exposed-modules:
+    Pluton.Sample.Offchain
+    Pluton.Sample.Test
+    Pluton.Sample.Validator.Haskell
+    Pluton.Sample.Validator.Plutarch
+    Pluton.Sample.Validator.Pluto
+
+  build-depends:
+    , base
+    , bytestring
+    , containers
+    , fin
+    , freer-extras
+    , hashable
+    , hedgehog
+    , lens
+    , mtl
+    , plutarch           >=1.0
+    , pluto
+    , pluton
     , plutus-contract
     , plutus-core
     , plutus-ledger
