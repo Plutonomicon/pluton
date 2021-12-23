@@ -2,7 +2,6 @@
 
 [![Hercules-ci][Herc badge]][Herc link]
 [![Cachix Cache][Cachix badge]][Cachix link]
-[![Built with Nix][Built with Nix badge]][Built with Nix link]
 
 [Herc badge]: https://img.shields.io/badge/ci--by--hercules-green.svg
 [Herc link]: https://hercules-ci.com/github/Plutonomicon/pluton
@@ -13,7 +12,7 @@
 
 Pluton is intended to:
 
-- enrich [Plutarch](https://github.com/Plutonomicon/plutarch) to enable a more ergonomic DSL for writing smart contracts. It is a staging ground for these features to eventually be upstreamed to Plutarch. 
+- Enrich [Plutarch](https://github.com/Plutonomicon/plutarch) to enable a more ergonomic DSL for writing smart contracts. It is a staging ground for these features to eventually be upstreamed to Plutarch. 
 - Benchmark (script size, cpu/mem cost) functions and smart contracts written in Haskell, Plutarch and [Pluto](https://github.com/Plutonomicon/pluto), and use that as a guide for enrichment.
 
 ## Developing
