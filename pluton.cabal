@@ -38,8 +38,11 @@ library
     Pluton.Evaluate
     Pluton.Types.Builtin
     Pluton.Types.Builtin.Data
+    Pluton.Types.Builtin.Fun
     Pluton.Types.Builtin.List
     Pluton.Types.Builtin.Pair
+    Pluton.Types.Builtin.Trace
+    Pluton.Types.Builtin.Uni
 
   build-depends:
     , base
