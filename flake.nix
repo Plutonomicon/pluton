@@ -136,7 +136,8 @@
         };
         checks = {
           benchmark = pkgs.runCommand "benchmark" { } "${self.apps.${system}.benchmark.program} | tee $out";
-          test = pkgs.runCommand "test" { } "${self.apps.${system}.test.program}";
+          # FIXME: In Hercules, this wouldn't display test output. But at least it is expected to run.
+          test = pkgs.runCommand "test" { } "${self.apps.${system}.test.program} | tee $out";
         };
         ciNix = inputs.flake-compat-ci.lib.recurseIntoFlakeWith {
           flake = self;
