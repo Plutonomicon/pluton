@@ -84,8 +84,8 @@ instance PlutusType PData where
         # pdelay (f (PDataInteger (B.pBuiltinFun @'PLC.UnIData @'[] # x)))
         # pdelay (f (PDataByteString (B.pBuiltinFun @'PLC.UnBData @'[] # x)))
 
-instance PUni PData where
-  type PUniType PData = PLC.Data
+instance PDefaultFun PData where
+  type PDefaultFunType PData = PLC.Data
 
 instance PEq PData where
   a #== b = B.pBuiltinFun @'PLC.EqualsData @'[] # a # b
