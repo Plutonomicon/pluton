@@ -12,6 +12,7 @@ common common
   default-extensions:
     DataKinds
     DerivingStrategies
+    FlexibleContexts
     GADTs
     ImportQualifiedPost
     LambdaCase
@@ -33,6 +34,8 @@ library
   import:          common
   hs-source-dirs:  src
   exposed-modules:
+    Pluton
+    Pluton.Evaluate
     Pluton.Sample.Offchain
     Pluton.Sample.Test
     Pluton.Sample.Validator.Haskell
@@ -74,6 +77,7 @@ executable pluton
   main-is:        Main.hs
   build-depends:
     , base
+    , plutarch
     , pluton
     , plutus-contract
     , plutus-core
