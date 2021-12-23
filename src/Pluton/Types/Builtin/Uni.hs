@@ -1,4 +1,4 @@
-module Pluton.Types.Builtin.Uni (PDefaultFun (..)) where
+module Pluton.Types.Builtin.Uni (PDefaultUni (..)) where
 
 import Data.ByteString
 import Data.Kind (Type)
@@ -14,24 +14,24 @@ import PlutusCore.Default qualified as PLC
 
 -- | Class of eDSL Types that map to Plutus builtin in its `DefaultUni`
 --
--- We use this in: PLC.knownUniOf $ Proxy @(PDefaultFunType a)
-class PLC.DefaultUni `PLC.Contains` PDefaultFunType a => PDefaultFun (a :: k -> Type) where
-  type PDefaultFunType a :: Type
+-- We use this in: PLC.knownUniOf $ Proxy @(PDefaultUniType a)
+class PLC.DefaultUni `PLC.Contains` PDefaultUniType a => PDefaultUni (a :: k -> Type) where
+  type PDefaultUniType a :: Type
 
-instance PDefaultFun PInteger where
-  type PDefaultFunType PInteger = Integer
+instance PDefaultUni PInteger where
+  type PDefaultUniType PInteger = Integer
 
-instance PDefaultFun PString where
-  type PDefaultFunType PString = Text
+instance PDefaultUni PString where
+  type PDefaultUniType PString = Text
 
-instance PDefaultFun PByteString where
-  type PDefaultFunType PByteString = ByteString
+instance PDefaultUni PByteString where
+  type PDefaultUniType PByteString = ByteString
 
-instance PDefaultFun PBool where
-  type PDefaultFunType PBool = Bool
+instance PDefaultUni PBool where
+  type PDefaultUniType PBool = Bool
 
-instance PDefaultFun PUnit where
-  type PDefaultFunType PUnit = ()
+instance PDefaultUni PUnit where
+  type PDefaultUniType PUnit = ()
 
-instance PDefaultFun POpaque where
-  type PDefaultFunType POpaque = PLC.Data
+instance PDefaultUni POpaque where
+  type PDefaultUniType POpaque = PLC.Data
