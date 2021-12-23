@@ -29,6 +29,8 @@ programs.direnv = {
 };
 ```
 
+If you use ghcid, you may find `bin/{ghcid,test}` handy.
+
 ## Running the tests
 
 In a nix-shell, run:
