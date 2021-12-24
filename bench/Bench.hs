@@ -2,27 +2,31 @@ module Main (main) where
 
 import Criterion.Main
 import Criterion.Types
+import Example.Contract.Gift.Test qualified as GiftTest
 import Example.Contract.Gift.Validator.Haskell qualified as Gift
 import Example.Contract.Gift.Validator.Plutarch qualified as Gift
 import Example.Contract.Gift.Validator.Pluto qualified as Gift
 import Pluton.Run qualified as Run
 
--- TODO: placeholder only for https://github.com/Plutonomicon/pluton/issues/9
---
--- We should add eDSL examples, and benchmark them here. The evaluator can
--- exposed from Plutarch (or it can be copied here).
-fib :: Int -> Int
-fib m
-  | m < 0 = error "negative!"
-  | otherwise = go m
-  where
-    go 0 = 0
-    go 1 = 1
-    go n = go (n -1) + go (n -2)
-
 main :: IO ()
 main = do
   exampleContractGift
+  placeholder
+
+exampleContractGift :: IO ()
+exampleContractGift = do
+  putStrLn "\n== Sample contract - Gift: sizes (haskell; pluto; plutarch) == "
+  print $ Run.emulatorTraceSize (GiftTest.smokeTrace Gift.haskellValidator)
+  print $ Run.emulatorTraceSize (GiftTest.smokeTrace Gift.plutoValidator)
+  print $ Run.emulatorTraceSize (GiftTest.smokeTrace Gift.plutarchValidator)
+  putStrLn "=="
+  print $ Run.validatorSize Gift.haskellValidator
+  print $ Run.validatorSize Gift.plutoValidator
+  print $ Run.validatorSize Gift.plutarchValidator
+
+-- TODO: remove this after https://github.com/Plutonomicon/pluton/issues/26
+placeholder :: IO ()
+placeholder = do
   defaultMainWith
     cfg
     [ bgroup
@@ -42,9 +46,11 @@ main = do
           csvFile = Just "bench.csv"
         }
 
-exampleContractGift :: IO ()
-exampleContractGift = do
-  putStrLn "\n== Sample contract - Gift: sizes (haskell; pluto; plutarch) == "
-  print $ Run.validatorSize Gift.haskellValidator
-  print $ Run.validatorSize Gift.plutoValidator
-  print $ Run.validatorSize Gift.plutarchValidator
+fib :: Int -> Int
+fib m
+  | m < 0 = error "negative!"
+  | otherwise = go m
+  where
+    go 0 = 0
+    go 1 = 1
+    go n = go (n -1) + go (n -2)

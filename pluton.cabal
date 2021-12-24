@@ -16,6 +16,7 @@ common common
     GADTs
     ImportQualifiedPost
     LambdaCase
+    NamedFieldPuns
     OverloadedStrings
     PolyKinds
     RankNTypes
@@ -52,8 +53,12 @@ library
     , cardano-api
     , cardano-ledger-alonzo
     , containers
+    , data-default
     , fin
+    , flat
+    , foldl
     , freer-extras
+    , freer-simple
     , hashable
     , hedgehog
     , lens
@@ -69,6 +74,7 @@ library
     , QuickCheck
     , serialise
     , shower
+    , streaming
     , tasty
     , tasty-hedgehog
     , tasty-quickcheck
@@ -153,8 +159,16 @@ benchmark perf
   main-is:        Bench.hs 
   build-depends:
     , base
+    , bytestring
     , criterion
+    , data-default
+    , flat
+    , foldl
+    , freer-simple
     , pluton
     , pluton-examples
     , plutus-contract
     , plutus-core
+    , plutus-ledger
+    , streaming
+    , text
