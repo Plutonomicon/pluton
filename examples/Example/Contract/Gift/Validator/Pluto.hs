@@ -10,7 +10,7 @@ import PlutusCore.Assembler.Types.AST qualified as Pluto
 -- FIXME: This is known to trigger a HLS bug with symbol resolution
 -- See https://github.com/haskell/haskell-language-server/issues/1737#issuecomment-825516365
 plutoValidatorProg :: Pluto.Program ()
-plutoValidatorProg = $(PlutoFFI.load "src/Pluton/Sample/Validator/validator.pluto")
+plutoValidatorProg = $(PlutoFFI.load "examples/Example/Contract/Gift/Validator/validator.pluto")
 
 plutoValidator :: Validator
 plutoValidator =

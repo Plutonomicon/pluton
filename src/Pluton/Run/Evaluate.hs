@@ -1,6 +1,7 @@
 module Pluton.Run.Evaluate
   ( -- * Evaluation of Plutarch eDSL
     evalPlutarch,
+    Plutarch.compile,
   )
 where
 
