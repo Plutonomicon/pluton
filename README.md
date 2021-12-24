@@ -43,13 +43,13 @@ cabal run pluton
 
 ## Benchmarks
 
-Note: Benchmarks are not implemented yet. This is only a placeholder.
+Note: Benchmarks are work in progress; we intend to benchmark all examples in CI.
 
 ```
 cabal bench
 ```
 
-This will write the benchmark report to `report.html`.
+This will write the benchmark report to `bench.*`.
 
 ### Benchmarking a commit
 

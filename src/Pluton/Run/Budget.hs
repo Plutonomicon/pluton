@@ -1,6 +1,11 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE RecordWildCards #-}
+
 -- | Execution budget and script size for Plutus scripts
 module Pluton.Run.Budget
   ( Budget (..),
+    NamedBudget (..),
     -- | * Budget for an arbitraty Plutus script
     scriptBudget,
     -- | * Budget for EmulatorTrace
@@ -15,12 +20,22 @@ import Control.Monad.Freer qualified as Freer
 import Data.ByteString.Lazy qualified as BSL
 import Data.ByteString.Lazy qualified as LB
 import Data.ByteString.Short qualified as SBS
+import Data.Csv
+  ( DefaultOrdered (..),
+    ToField,
+    ToNamedRecord (..),
+    header,
+    namedRecord,
+    (.=),
+  )
 import Data.Default (Default (def))
 import Data.Int (Int64)
 import Data.Maybe (fromJust)
 import Flat (flat)
+import GHC.Generics
 import GHC.Stack (HasCallStack)
-import Ledger.Index (ExBudget, ScriptValidationEvent (..), ValidatorMode (FullyAppliedValidators), getScript)
+import Ledger (ExBudget (ExBudget))
+import Ledger.Index (ExCPU, ExMemory, ScriptValidationEvent (..), ValidatorMode (FullyAppliedValidators), getScript)
 import Ledger.Scripts (Script)
 import Ledger.Scripts qualified as Scripts
 import Plutus.Trace.Emulator qualified as Em
@@ -28,12 +43,6 @@ import Plutus.V1.Ledger.Api qualified as Plutus
 import Streaming.Prelude qualified as S
 import Wallet.Emulator.Folds qualified as Folds
 import Wallet.Emulator.Stream (foldEmulatorStreamM)
-
-data Budget = Budget
-  { exBudget :: ExBudget,
-    scriptSizeBytes :: Int64
-  }
-  deriving stock (Show)
 
 -- | Return the exbudget and script size of the *applied* validator run inside
 -- an Emulator trace.
@@ -55,7 +64,7 @@ emulatorTraceBudget trace =
         let bytes = BSL.fromStrict . flat . Scripts.unScript . getScript mode $ event
             byteSize = BSL.length bytes
             exBudget = either (error . show) fst sveResult
-         in Budget exBudget byteSize
+         in mkBudget exBudget byteSize
    in f . exactlyOne $ getEvents Folds.scriptEvents
   where
     exactlyOne :: [a] -> a
@@ -63,7 +72,7 @@ emulatorTraceBudget trace =
     exactlyOne _ = error "benchEmulatorTrace: expected exactly one validator run"
 
 scriptBudget :: Script -> Budget
-scriptBudget = uncurry Budget . (evalScriptCounting &&& (fromInteger . toInteger . SBS.length)) . serialiseScript
+scriptBudget = uncurry mkBudget . (evalScriptCounting &&& (fromInteger . toInteger . SBS.length)) . serialiseScript
 
 serialiseScript :: Script -> SBS.ShortByteString
 serialiseScript = SBS.toShort . LB.toStrict . Codec.serialise -- Using `flat` here breaks `evalScriptCounting`
@@ -75,3 +84,29 @@ evalScriptCounting script = do
    in case e of
         Left evalErr -> error ("Eval Error: " <> show evalErr)
         Right exbudget -> exbudget
+
+--- Types
+
+data Budget = Budget
+  { exBudgetCPU :: ExCPU,
+    exBudgetMemory :: ExMemory,
+    scriptSizeBytes :: ScriptSizeBytes
+  }
+  deriving stock (Show, Generic)
+
+newtype ScriptSizeBytes = ScriptSizeBytes Int64
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving newtype (Num, ToField)
+
+newtype NamedBudget = NamedBudget (String, Budget)
+  deriving stock (Show, Generic)
+
+instance ToNamedRecord NamedBudget where
+  toNamedRecord (NamedBudget (name, Budget {..})) =
+    namedRecord ["name" .= name, "cpu" .= exBudgetCPU, "mem" .= exBudgetMemory, "size" .= scriptSizeBytes]
+
+instance DefaultOrdered NamedBudget where
+  headerOrder _ = header ["name", "cpu", "mem", "size"]
+
+mkBudget :: ExBudget -> Int64 -> Budget
+mkBudget (ExBudget cpu mem) = Budget cpu mem . ScriptSizeBytes
