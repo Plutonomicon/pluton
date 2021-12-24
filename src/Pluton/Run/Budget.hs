@@ -3,14 +3,12 @@ module Pluton.Run.Budget
   ( Budget (..),
     -- | * Budget for an arbitraty Plutus script
     scriptBudget,
-    -- | * Budget for a smart contract validator script
-    validatorBudget,
     -- | * Budget for EmulatorTrace
     emulatorTraceBudget,
   )
 where
 
-import Codec.Serialise (serialise)
+import Codec.Serialise qualified as Codec
 import Control.Arrow ((&&&))
 import Control.Foldl qualified as Foldl
 import Control.Monad.Freer qualified as Freer
@@ -23,7 +21,8 @@ import Data.Maybe (fromJust)
 import Flat (flat)
 import GHC.Stack (HasCallStack)
 import Ledger.Index (ExBudget, ScriptValidationEvent (..), ValidatorMode (FullyAppliedValidators), getScript)
-import Ledger.Scripts (Script (unScript), Validator)
+import Ledger.Scripts (Script)
+import Ledger.Scripts qualified as Scripts
 import Plutus.Trace.Emulator qualified as Em
 import Plutus.V1.Ledger.Api qualified as Plutus
 import Streaming.Prelude qualified as S
@@ -53,7 +52,7 @@ emulatorTraceBudget trace =
       -- Note: This doesn't deal with minting policy scripts
       mode = FullyAppliedValidators
       f event@ScriptValidationEvent {sveResult} =
-        let bytes = BSL.fromStrict . flat . unScript . getScript mode $ event
+        let bytes = BSL.fromStrict . flat . Scripts.unScript . getScript mode $ event
             byteSize = BSL.length bytes
             exBudget = either (error . show) fst sveResult
          in Budget exBudget byteSize
@@ -63,21 +62,11 @@ emulatorTraceBudget trace =
     exactlyOne [x] = x
     exactlyOne _ = error "benchEmulatorTrace: expected exactly one validator run"
 
--- | Return the script size in bytes along with execution budget.
---
--- NOTE: This calculates the budget for an *applied* validator. Use
--- @emulatorTraceBudget@ if you want to calculate on applied validators.
-validatorBudget :: Validator -> Budget
-validatorBudget = uncurry Budget . (evalScriptCounting &&& (fromInteger . toInteger . SBS.length)) . serialiseValidator
-
 scriptBudget :: Script -> Budget
 scriptBudget = uncurry Budget . (evalScriptCounting &&& (fromInteger . toInteger . SBS.length)) . serialiseScript
 
 serialiseScript :: Script -> SBS.ShortByteString
-serialiseScript = SBS.toShort . LB.toStrict . serialise
-
-serialiseValidator :: Validator -> SBS.ShortByteString
-serialiseValidator = SBS.toShort . LB.toStrict . serialise
+serialiseScript = SBS.toShort . LB.toStrict . Codec.serialise -- Using `flat` here breaks `evalScriptCounting`
 
 evalScriptCounting :: HasCallStack => Plutus.SerializedScript -> Plutus.ExBudget
 evalScriptCounting script = do

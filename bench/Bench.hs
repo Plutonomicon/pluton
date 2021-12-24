@@ -19,10 +19,7 @@ exampleContractGift = do
   print $ Run.emulatorTraceBudget (GiftTest.smokeTrace Gift.haskellValidator)
   print $ Run.emulatorTraceBudget (GiftTest.smokeTrace Gift.plutoValidator)
   print $ Run.emulatorTraceBudget (GiftTest.smokeTrace Gift.plutarchValidator)
-  putStrLn "=="
-  print $ Run.validatorBudget Gift.haskellValidator
-  print $ Run.validatorBudget Gift.plutoValidator
-  print $ Run.validatorBudget Gift.plutarchValidator
+
 
 -- TODO: remove this after https://github.com/Plutonomicon/pluton/issues/26
 placeholder :: IO ()
