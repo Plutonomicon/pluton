@@ -2,6 +2,10 @@ module Main (main) where
 
 import Criterion.Main
 import Criterion.Types
+import Example.Contract.Gift.Validator.Haskell qualified as Gift
+import Example.Contract.Gift.Validator.Plutarch qualified as Gift
+import Example.Contract.Gift.Validator.Pluto qualified as Gift
+import Pluton.Run qualified as Run
 
 -- TODO: placeholder only for https://github.com/Plutonomicon/pluton/issues/9
 --
@@ -17,7 +21,8 @@ fib m
     go n = go (n -1) + go (n -2)
 
 main :: IO ()
-main =
+main = do
+  exampleContractGift
   defaultMainWith
     cfg
     [ bgroup
@@ -36,3 +41,10 @@ main =
           jsonFile = Just "bench.json",
           csvFile = Just "bench.csv"
         }
+
+exampleContractGift :: IO ()
+exampleContractGift = do
+  putStrLn "\n== Sample contract - Gift: sizes (haskell; pluto; plutarch) == "
+  print $ Run.validatorSize Gift.haskellValidator
+  print $ Run.validatorSize Gift.plutoValidator
+  print $ Run.validatorSize Gift.plutarchValidator
