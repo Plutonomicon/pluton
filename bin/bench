@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -xe
+
+ghcid --restart=pluton.cabal -c 'cabal repl perf' -T :main
