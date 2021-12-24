@@ -7,7 +7,7 @@
 {-# LANGUAGE PostfixOperators #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
-module Pluton.Sample.Validator.Plutarch (plutarchValidator) where
+module Example.Contract.Gift.Validator.Plutarch (plutarchValidator) where
 
 import Ledger.Scripts (Validator (..))
 import Plutarch

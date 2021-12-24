@@ -3,8 +3,8 @@
 module Main (main) where
 
 import Pluton qualified as Pluton
-import Pluton.Sample.Test qualified as SampleTest
-import Pluton.Sample.Validator.Plutarch qualified as Sample
+import Example.Contract.Gift.Test qualified as SampleTest
+import Example.Contract.Gift.Validator.Plutarch qualified as Sample
 import Plutus.Trace.Emulator qualified as Em
 
 main :: IO ()

@@ -69,15 +69,15 @@ library
     , tasty-quickcheck
     , text
 
-library pluton-example-contract
+library pluton-examples
   import:          common
-  hs-source-dirs:  examples/contract
+  hs-source-dirs:  examples
   exposed-modules:
-    Pluton.Sample.Offchain
-    Pluton.Sample.Test
-    Pluton.Sample.Validator.Haskell
-    Pluton.Sample.Validator.Plutarch
-    Pluton.Sample.Validator.Pluto
+    Example.Contract.Gift.Offchain
+    Example.Contract.Gift.Test
+    Example.Contract.Gift.Validator.Haskell
+    Example.Contract.Gift.Validator.Plutarch
+    Example.Contract.Gift.Validator.Pluto
 
   build-depends:
     , base
@@ -113,7 +113,7 @@ executable pluton
     , base
     , plutarch
     , pluton
-    , pluton-example-contract
+    , pluton-examples
     , plutus-contract
     , plutus-core
 
