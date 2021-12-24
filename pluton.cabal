@@ -155,5 +155,6 @@ benchmark perf
     , base
     , criterion
     , pluton
+    , pluton-examples
     , plutus-contract
     , plutus-core
