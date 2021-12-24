@@ -6,7 +6,7 @@ import Plutarch qualified
 import Plutarch qualified as PLC
 import Plutarch.Bool as X
 import Plutarch.Integer as X
-import Pluton.Evaluate qualified as Smoke
+import Pluton.Run.Evaluate qualified as Smoke
 import Pluton.Types.Builtin as X
 import Pluton.Types.Builtin.Data ()
 import Pluton.Types.Builtin.List qualified as BL

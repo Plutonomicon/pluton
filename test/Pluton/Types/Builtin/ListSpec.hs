@@ -2,7 +2,7 @@ module Pluton.Types.Builtin.ListSpec (tests) where
 
 import Hedgehog
 import Pluton
-import Pluton.Evaluate qualified as Eval
+import Pluton.Run.Evaluate qualified as Eval
 import Pluton.Types.Builtin.List
 import Test.Tasty
 import Test.Tasty.Hedgehog

@@ -15,6 +15,8 @@ Pluton is intended to:
 - Enrich [Plutarch](https://github.com/Plutonomicon/plutarch) to enable a more ergonomic DSL for writing smart contracts. It is a staging ground for these features to eventually be upstreamed to Plutarch. 
 - Benchmark (script size, cpu/mem cost) functions and smart contracts written in Haskell, Plutarch and [Pluto](https://github.com/Plutonomicon/pluto), and use that as a guide for enrichment.
 
+See [Project board](https://github.com/orgs/Plutonomicon/projects/2/views/1) for planned tasks.
+
 ## Developing
 
 `nix develop` should get a dev environment with Haskell Language Server support and ghcid.

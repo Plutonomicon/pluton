@@ -35,7 +35,7 @@ library
   hs-source-dirs:  src
   exposed-modules:
     Pluton
-    Pluton.Evaluate
+    Pluton.Run.Evaluate
     Pluton.Types.Builtin
     Pluton.Types.Builtin.Data
     Pluton.Types.Builtin.Fun
@@ -47,6 +47,8 @@ library
   build-depends:
     , base
     , bytestring
+    , cardano-api
+    , cardano-ledger-alonzo
     , containers
     , fin
     , freer-extras
@@ -54,7 +56,7 @@ library
     , hedgehog
     , lens
     , mtl
-    , plutarch           >=1.0
+    , plutarch               >=1.0
     , pluto
     , plutus-contract
     , plutus-core
@@ -63,6 +65,7 @@ library
     , plutus-tx
     , plutus-tx-plugin
     , QuickCheck
+    , serialise
     , shower
     , tasty
     , tasty-hedgehog

@@ -1,9 +1,5 @@
-module Pluton.Evaluate
-  ( -- * General evaluation of UPLC
-    eval,
-    evalWithArgs,
-
-    -- * Evaluation of Plutarch eDSL
+module Pluton.Run.Evaluate
+  ( -- * Evaluation of Plutarch eDSL
     evalPlutarch,
   )
 where
@@ -41,8 +37,8 @@ evalPlutarch p =
 eval :: Script -> Either Error (ExBudget, [Text], Term Name DefaultUni DefaultFun ())
 eval = evaluateScript @(Either Error)
 
-evalWithArgs :: [PLC.Data] -> Script -> Either Error (ExBudget, [Text], Term Name DefaultUni DefaultFun ())
-evalWithArgs args =
+_evalWithArgs :: [PLC.Data] -> Script -> Either Error (ExBudget, [Text], Term Name DefaultUni DefaultFun ())
+_evalWithArgs args =
   evaluateScript @(Either Error)
     . flip Scripts.applyArguments args
 
