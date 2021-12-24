@@ -35,7 +35,7 @@ smoke = do
   let eval :: ClosedTerm a -> IO ()
       eval p = do
         print $ Smoke.evalPlutarch p
-        print $ Run.scriptSize $ Run.compile p
+        print $ Run.scriptBudget $ Run.compile p
       fourtyTwo = 42 :: Term s PInteger
       intNil =
         Plutarch.punsafeConstant $

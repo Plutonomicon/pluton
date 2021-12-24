@@ -1,7 +1,11 @@
-module Pluton.Run.ScriptSize
-  ( scriptSize,
-    validatorSize,
-    emulatorTraceSize,
+-- | Execution budget and script size for Plutus scripts
+module Pluton.Run.Budget
+  ( -- | * Budget for an arbitraty Plutus script
+    scriptBudget,
+    -- | * Budget for a smart contract validator script
+    validatorBudget,
+    -- | * Budget for EmulatorTrace
+    emulatorTraceBudget,
   )
 where
 
@@ -12,7 +16,7 @@ import Control.Monad.Freer qualified as Freer
 import Data.ByteString.Lazy qualified as BSL
 import Data.ByteString.Lazy qualified as LB
 import Data.ByteString.Short qualified as SBS
-import Data.Default
+import Data.Default (Default (def))
 import Data.Int (Int64)
 import Data.Maybe (fromJust)
 import Data.Monoid (Sum (..))
@@ -26,14 +30,14 @@ import Streaming.Prelude qualified as S
 import Wallet.Emulator.Folds qualified as Folds
 import Wallet.Emulator.Stream (foldEmulatorStreamM)
 
--- | Return the exbudget and script size of the validator run inside an
--- Emulator trace.
+-- | Return the exbudget and script size of the *applied* validator run inside
+-- an Emulator trace.
 --
 -- The trace must have run the validation exactly once, else this will fail. We
 -- do this, because we are benchmarking a single run of the validator, not
 -- multiple runs.
-emulatorTraceSize :: Em.EmulatorTrace a -> (ExBudget, Sum Int64)
-emulatorTraceSize trace =
+emulatorTraceBudget :: Em.EmulatorTrace a -> (ExBudget, Sum Int64)
+emulatorTraceBudget trace =
   -- Most of the code here is taken from `Plutus.Trace.Emulator.Extract` (IOHK
   -- doesn't care to export it).
   let stream = Em.runEmulatorStream def trace
@@ -54,11 +58,14 @@ emulatorTraceSize trace =
     exactlyOne _ = error "benchEmulatorTrace: expected exactly one validator run"
 
 -- | Return the script size in bytes along with execution budget.
-validatorSize :: Validator -> (Plutus.ExBudget, Int)
-validatorSize = (evalScriptCounting &&& SBS.length) . serialiseValidator
+--
+-- NOTE: This calculates the budget for an *applied* validator. Use
+-- @emulatorTraceBudget@ if you want to calculate on applied validators.
+validatorBudget :: Validator -> (Plutus.ExBudget, Int)
+validatorBudget = (evalScriptCounting &&& SBS.length) . serialiseValidator
 
-scriptSize :: Script -> (Plutus.ExBudget, Int)
-scriptSize = (evalScriptCounting &&& SBS.length) . serialiseScript
+scriptBudget :: Script -> (Plutus.ExBudget, Int)
+scriptBudget = (evalScriptCounting &&& SBS.length) . serialiseScript
 
 serialiseScript :: Script -> SBS.ShortByteString
 serialiseScript = SBS.toShort . LB.toStrict . serialise

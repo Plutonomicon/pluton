@@ -38,7 +38,7 @@ library
     Pluton
     Pluton.Run
     Pluton.Run.Evaluate
-    Pluton.Run.ScriptSize
+    Pluton.Run.Budget
     Pluton.Types.Builtin
     Pluton.Types.Builtin.Data
     Pluton.Types.Builtin.Fun

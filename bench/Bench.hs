@@ -16,13 +16,13 @@ main = do
 exampleContractGift :: IO ()
 exampleContractGift = do
   putStrLn "\n== Sample contract - Gift: sizes (haskell; pluto; plutarch) == "
-  print $ Run.emulatorTraceSize (GiftTest.smokeTrace Gift.haskellValidator)
-  print $ Run.emulatorTraceSize (GiftTest.smokeTrace Gift.plutoValidator)
-  print $ Run.emulatorTraceSize (GiftTest.smokeTrace Gift.plutarchValidator)
+  print $ Run.emulatorTraceBudget (GiftTest.smokeTrace Gift.haskellValidator)
+  print $ Run.emulatorTraceBudget (GiftTest.smokeTrace Gift.plutoValidator)
+  print $ Run.emulatorTraceBudget (GiftTest.smokeTrace Gift.plutarchValidator)
   putStrLn "=="
-  print $ Run.validatorSize Gift.haskellValidator
-  print $ Run.validatorSize Gift.plutoValidator
-  print $ Run.validatorSize Gift.plutarchValidator
+  print $ Run.validatorBudget Gift.haskellValidator
+  print $ Run.validatorBudget Gift.plutoValidator
+  print $ Run.validatorBudget Gift.plutarchValidator
 
 -- TODO: remove this after https://github.com/Plutonomicon/pluton/issues/26
 placeholder :: IO ()
