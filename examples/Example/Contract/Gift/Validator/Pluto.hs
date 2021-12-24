@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Pluton.Sample.Validator.Pluto (plutoValidator) where
+module Example.Contract.Gift.Validator.Pluto (plutoValidator) where
 
 import Ledger.Scripts (Validator (..))
 import PlutusCore.Assembler.Assemble qualified as Pluto

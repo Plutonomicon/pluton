@@ -5,7 +5,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoOverloadedStrings #-}
 
-module Pluton.Sample.Test (tests, smokeTrace) where
+module Example.Contract.Gift.Test (tests, smokeTrace) where
 
 import Control.Lens.Combinators (makeLenses, view)
 import Control.Lens.Operators ((^.))
@@ -14,10 +14,10 @@ import Control.Monad.Freer.Extras qualified as Extras
 import Data.Text (Text)
 import Ledger hiding (singleton)
 import Ledger.Ada as Ada (lovelaceValueOf)
-import Pluton.Sample.Offchain
-import Pluton.Sample.Validator.Haskell (haskellValidator)
-import Pluton.Sample.Validator.Plutarch (plutarchValidator)
-import Pluton.Sample.Validator.Pluto (plutoValidator)
+import Example.Contract.Gift.Offchain
+import Example.Contract.Gift.Validator.Haskell (haskellValidator)
+import Example.Contract.Gift.Validator.Plutarch (plutarchValidator)
+import Example.Contract.Gift.Validator.Pluto (plutoValidator)
 import Plutus.Contract.Test (w1, w2, w3)
 import Plutus.Contract.Test qualified as PCT
 import Plutus.Contract.Test.ContractModel qualified as PCT
