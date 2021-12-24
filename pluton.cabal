@@ -37,8 +37,8 @@ library
   exposed-modules:
     Pluton
     Pluton.Run
+    Pluton.Run.Budget
     Pluton.Run.Evaluate
-    Pluton.Run.ScriptSize
     Pluton.Types.Builtin
     Pluton.Types.Builtin.Data
     Pluton.Types.Builtin.Fun
@@ -52,6 +52,7 @@ library
     , bytestring
     , cardano-api
     , cardano-ledger-alonzo
+    , cassava
     , containers
     , data-default
     , fin
@@ -159,16 +160,16 @@ benchmark perf
   main-is:        Bench.hs 
   build-depends:
     , base
+    , boxes
     , bytestring
+    , cassava
     , criterion
     , data-default
-    , flat
     , foldl
-    , freer-simple
+    , mtl
     , pluton
     , pluton-examples
     , plutus-contract
     , plutus-core
     , plutus-ledger
-    , streaming
     , text

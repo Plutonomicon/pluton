@@ -137,7 +137,7 @@
         # We need to append the checks that come from haskell.nix to our own,
         # hence the need for flake.checks // {}.
         checks = flake.checks // {
-          benchmark = pkgs.runCommand "benchmark" {} "${self.apps.${system}.benchmark.program} | tee $out";
+          benchmark = pkgs.runCommand "benchmark" { } "${self.apps.${system}.benchmark.program} | tee $out";
         };
         ciNix = inputs.flake-compat-ci.lib.recurseIntoFlakeWith {
           flake = self;
