@@ -39,13 +39,6 @@ library
     Pluton.Run
     Pluton.Run.Budget
     Pluton.Run.Evaluate
-    Pluton.Types.Builtin
-    Pluton.Types.Builtin.Data
-    Pluton.Types.Builtin.Fun
-    Pluton.Types.Builtin.List
-    Pluton.Types.Builtin.Pair
-    Pluton.Types.Builtin.Trace
-    Pluton.Types.Builtin.Uni
 
   build-depends:
     , base
@@ -134,7 +127,6 @@ test-suite spec
   type:           exitcode-stdio-1.0
   main-is:        Spec.hs
   hs-source-dirs: test
-  other-modules:  Pluton.Types.Builtin.ListSpec
   build-depends:
     , base
     , bytestring
