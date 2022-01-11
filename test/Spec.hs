@@ -15,5 +15,4 @@ tests =
   localOption limit $
     testGroup
       "dsl"
-      [ 
-      ]
+      []
