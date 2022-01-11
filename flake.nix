@@ -272,51 +272,14 @@
               pkgs.nixpkgs-fmt
               pkgs.ormolu
               pkgs.ghcid
-              # pkgs.cabal-fmt
               pkgs.haskellPackages.cabal-fmt
             ];
 
             tools = {
               haskell-language-server = { }; # Must use haskell.nix, because the compiler version should match
-              # cabal-fmt = { };
             };
 
             additional = ps: [
-              ps.base-deriving-via
-              ps.cardano-addresses
-              ps.cardano-addresses-cli
-              ps.cardano-binary
-              ps.cardano-crypto
-              ps.cardano-crypto-class
-              ps.cardano-crypto-praos
-              ps.cardano-crypto-wrapper
-              ps.cardano-ledger-alonzo
-              ps.cardano-ledger-byron
-              ps.cardano-ledger-core
-              ps.cardano-ledger-pretty
-              ps.cardano-ledger-shelley
-              ps.cardano-ledger-shelley-ma
-              ps.cardano-prelude
-              ps.cardano-slotting
-              ps.flat
-              ps.freer-extras
-              ps.goblins
-              ps.measures
-              ps.orphans-deriving-via
-              ps.playground-common
-              ps.plutus-contract
-              ps.plutus-core
-              ps.plutus-ledger
-              ps.plutus-ledger-api
-              ps.plutus-pab
-              ps.plutus-playground-server
-              ps.plutus-tx
-              ps.plutus-tx-plugin
-              ps.plutus-use-cases
-              ps.prettyprinter-configurable
-              ps.quickcheck-dynamic
-              ps.Win32-network
-              ps.word-array
               ps.pluto
               ps.plutarch
             ];
