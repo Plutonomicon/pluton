@@ -15,7 +15,7 @@
     flake-utils.url = "github:numtide/flake-utils";
 
     # Plutus inputs 
-    plutus.url = "github:input-output-hk/plutus?rev=6d8d25d1e84b2a4278da1036aab23da4161b8df8";
+    plutus.url = "github:input-output-hk/plutus?rev=ae5f8b3ff64766717694bdca3d0385e717a963b8";
     plutus-apps.url = "github:input-output-hk/plutus-apps?rev=ff17e42be4ede4ff9711634f1b924ca1de90851a";
     cardano-prelude.url = "github:input-output-hk/cardano-prelude?rev=fd773f7a58412131512b9f694ab95653ac430852";
     cardano-prelude.flake = false;
