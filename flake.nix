@@ -33,11 +33,9 @@
     cardano-addresses.flake = false;
     ouroboros-network.url = "github:input-output-hk/ouroboros-network?rev=1f4973f36f689d6da75b5d351fb124d66ef1057d";
     ouroboros-network.flake = false;
-    # ee59880f47ab835dbd73bea0847dab7869fc20d8
-    flat.url = "github:Quid2/flat?rev=d32c2c0c0c3c38c41177684ade9febe92d279b06";
+    flat.url = "github:Quid2/flat?rev=ee59880f47ab835dbd73bea0847dab7869fc20d8";
     flat.flake = false;
-    # 2d1a01c7cbb9f68a1aefe2934aad6c70644ebfea
-    Win32-network.url = "github:input-output-hk/Win32-network?rev=3825d3abf75f83f406c1f7161883c438dac7277d";
+    Win32-network.url = "github:input-output-hk/Win32-network?rev=2d1a01c7cbb9f68a1aefe2934aad6c70644ebfea";
     Win32-network.flake = false;
     iohk-monitoring-framework.url = "github:input-output-hk/iohk-monitoring-framework?rev=46f994e216a1f8b36fe4669b47b2a7011b0e153c";
     iohk-monitoring-framework.flake = false;

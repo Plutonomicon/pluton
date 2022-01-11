@@ -35,17 +35,17 @@
     "Win32-network": {
       "flake": false,
       "locked": {
-        "lastModified": 1627315969,
-        "narHash": "sha256-Hesb5GXSx0IwKSIi42ofisVELcQNX6lwHcoZcbaDiqc=",
+        "lastModified": 1636063162,
+        "narHash": "sha256-uvYEWalN62ETpH45/O7lNHo4rAIaJtYpLWdIcAkq3dA=",
         "owner": "input-output-hk",
         "repo": "Win32-network",
-        "rev": "3825d3abf75f83f406c1f7161883c438dac7277d",
+        "rev": "2d1a01c7cbb9f68a1aefe2934aad6c70644ebfea",
         "type": "github"
       },
       "original": {
         "owner": "input-output-hk",
         "repo": "Win32-network",
-        "rev": "3825d3abf75f83f406c1f7161883c438dac7277d",
+        "rev": "2d1a01c7cbb9f68a1aefe2934aad6c70644ebfea",
         "type": "github"
       }
     },
@@ -345,17 +345,17 @@
     "flat": {
       "flake": false,
       "locked": {
-        "lastModified": 1630339624,
-        "narHash": "sha256-5TokQ8IgZYUI6YsfUB4FovwD3xAv1ky/MpY8XmOnd4U=",
+        "lastModified": 1628771504,
+        "narHash": "sha256-lRFND+ZnZvAph6ZYkr9wl9VAx41pb3uSFP8Wc7idP9M=",
         "owner": "Quid2",
         "repo": "flat",
-        "rev": "d32c2c0c0c3c38c41177684ade9febe92d279b06",
+        "rev": "ee59880f47ab835dbd73bea0847dab7869fc20d8",
         "type": "github"
       },
       "original": {
         "owner": "Quid2",
         "repo": "flat",
-        "rev": "d32c2c0c0c3c38c41177684ade9febe92d279b06",
+        "rev": "ee59880f47ab835dbd73bea0847dab7869fc20d8",
         "type": "github"
       }
     },
