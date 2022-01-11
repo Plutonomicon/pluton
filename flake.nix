@@ -261,14 +261,12 @@
               pkgs.ormolu
               pkgs.ghcid
               # pkgs.cabal-fmt
-              # pkgs.haskellPackages.cabal-fmt
-              # pkgs.hlint
-              # pkgs.ghcid
+              pkgs.haskellPackages.cabal-fmt
             ];
 
             tools = {
               haskell-language-server = { }; # Must use haskell.nix, because the compiler version should match
-              cabal-fmt = { };
+              # cabal-fmt = { };
             };
 
             additional = ps: [
