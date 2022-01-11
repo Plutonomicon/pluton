@@ -1,6 +1,5 @@
 module Main (main, limit, tests) where
 
-import Pluton.Types.Builtin.ListSpec qualified as ListSpec
 import Test.Tasty
 import Test.Tasty.Hedgehog (HedgehogTestLimit (..))
 
@@ -16,8 +15,4 @@ tests =
   localOption limit $
     testGroup
       "dsl"
-      [ testGroup
-          "types"
-          [ ListSpec.tests
-          ]
-      ]
+      []
