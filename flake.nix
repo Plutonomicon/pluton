@@ -45,6 +45,10 @@
     goblins.flake = false;
     optparse-applicative.url = "github:input-output-hk/optparse-applicative?rev=7497a29cb998721a9068d5725d49461f2bba0e7a";
     optparse-applicative.flake = false;
+    purescript-bridge.url = "github:input-output-hk/purescript-bridge?rev=366fc70b341e2633f3ad0158a577d52e1cd2b138";
+    purescript-bridge.flake = false;
+    servant-purescript.url = "github:input-output-hk/servant-purescript?rev=ebea59c7bdfc0338d83fca772b9a57e28560bcde";
+    servant-purescript.flake = false;
 
     # Our project dependenties
     pluto.url = "github:Plutonomicon/pluto";
@@ -100,6 +104,14 @@
             }
             {
               src = inputs.flat;
+              subdirs = [ "." ];
+            }
+            {
+              src = inputs.purescript-bridge;
+              subdirs = [ "." ];
+            }
+            {
+              src = inputs.servant-purescript;
               subdirs = [ "." ];
             }
             {

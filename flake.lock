@@ -965,6 +965,23 @@
         "type": "github"
       }
     },
+    "purescript-bridge": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1635433489,
+        "narHash": "sha256-paaId4GJ9/Z5LstYfakiCJZ2p9Q5NMHXdXUx5rTPQKI=",
+        "owner": "input-output-hk",
+        "repo": "purescript-bridge",
+        "rev": "366fc70b341e2633f3ad0158a577d52e1cd2b138",
+        "type": "github"
+      },
+      "original": {
+        "owner": "input-output-hk",
+        "repo": "purescript-bridge",
+        "rev": "366fc70b341e2633f3ad0158a577d52e1cd2b138",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "Shrinker": "Shrinker",
@@ -992,7 +1009,26 @@
         "plutarch": "plutarch",
         "pluto": "pluto",
         "plutus": "plutus",
-        "plutus-apps": "plutus-apps"
+        "plutus-apps": "plutus-apps",
+        "purescript-bridge": "purescript-bridge",
+        "servant-purescript": "servant-purescript"
+      }
+    },
+    "servant-purescript": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1635969498,
+        "narHash": "sha256-VkM9Q2XkDEnQh6khptoIjQ9xW7Fc2wsOJ4vPYDzBTD4=",
+        "owner": "input-output-hk",
+        "repo": "servant-purescript",
+        "rev": "ebea59c7bdfc0338d83fca772b9a57e28560bcde",
+        "type": "github"
+      },
+      "original": {
+        "owner": "input-output-hk",
+        "repo": "servant-purescript",
+        "rev": "ebea59c7bdfc0338d83fca772b9a57e28560bcde",
+        "type": "github"
       }
     },
     "spago2nix": {
